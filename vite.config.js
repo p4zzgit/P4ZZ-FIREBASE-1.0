@@ -18,7 +18,9 @@ const blockBackendFilesPlugin = () => ({
   }
 });
 
-export default defineConfig(({ mode }) => {
+export default defineConfig({
+  base: '/P4ZZ-FIREBASE-1.0/',
+})
     const env = loadEnv(mode, '.', '');
     return {
       base: './',
