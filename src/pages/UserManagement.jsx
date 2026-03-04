@@ -92,7 +92,7 @@ export default function UserManagement() {
     refreshData();
   }, [refreshData]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field, value) => {
     const updated = { ...formData, [field]: value };
     
     if (field === 'role') {
@@ -123,10 +123,10 @@ export default function UserManagement() {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const allUsers = await getUsers();
-    const errors: Record<string, string> = {};
+    const errors = {};
     
     const loginClean = formData.email.trim().toLowerCase();
     const docClean = formData.document.replace(/\D/g, '');
@@ -158,7 +158,7 @@ export default function UserManagement() {
         return;
     }
 
-    const newUser: User = {
+    const newUser = {
       id: editingUser ? editingUser.id : 'user-' + Math.random().toString(36).substr(2, 9),
       name: formData.name.toUpperCase(),
       tenantId: formData.establishmentName.toUpperCase(),
@@ -194,13 +194,13 @@ export default function UserManagement() {
         phone: newUser.whatsapp || '', 
         document: newUser.document,
         balance: idx !== -1 ? customers[idx].balance : 0, 
-        status: 'active' as any,
+        status: 'active',
         createdAt: idx !== -1 ? customers[idx].createdAt : new Date().toISOString(),
         linkedUserId: newUser.id, 
         licenseExpiresAt: newUser.expiresAt || '',
         planName: newUser.planName
       };
-      if (idx !== -1) customers[idx] = custData as any; else customers.push(custData as any);
+      if (idx !== -1) customers[idx] = custData; else customers.push(custData);
       await saveCustomers(customers, 'MASTER');
     }
 
@@ -209,7 +209,7 @@ export default function UserManagement() {
     notifyDataChanged();
   };
 
-  const handleOpenModal = (user?: User) => {
+  const handleOpenModal = (user) => {
     setFormErrors({});
     if (user) {
       setEditingUser(user);
@@ -245,7 +245,7 @@ export default function UserManagement() {
     setIsModalOpen(true);
   };
 
-  const executeApprove = async (req: AccessRequest) => {
+  const executeApprove = async (req) => {
     const allUsers = await getUsers();
     
     // Verifica duplicidade antes de aprovar
@@ -261,7 +261,7 @@ export default function UserManagement() {
         return;
     }
 
-    let userRole: User['role'] = 'customer';
+    let userRole = 'customer';
     let daysToRenew = 30;
     let expiryDate = '';
     
@@ -280,7 +280,7 @@ export default function UserManagement() {
       expiryDate = d.toISOString();
     }
 
-    const newUser: User = {
+    const newUser = {
       id: 'user-' + Math.random().toString(36).substr(2, 9),
       name: (req.name || 'SOLICITANTE').toUpperCase(),
       tenantId: (req.name || 'EMPRESA').toUpperCase(),
@@ -315,7 +315,7 @@ export default function UserManagement() {
         linkedUserId: newUser.id,
         licenseExpiresAt: newUser.expiresAt,
         planName: newUser.planName
-    } as any);
+    });
     await saveCustomers(customers, 'MASTER');
 
     await removeAccessRequest(req.id);
@@ -323,7 +323,7 @@ export default function UserManagement() {
     notifyDataChanged();
   };
 
-  const handleApproveConfirmation = (req: AccessRequest) => {
+  const handleApproveConfirmation = (req) => {
     setConfirmModal({
       show: true,
       title: 'Aprovar Solicitação?',
@@ -336,7 +336,7 @@ export default function UserManagement() {
     });
   };
 
-  const handleRejectConfirmation = (req: AccessRequest) => {
+  const handleRejectConfirmation = (req) => {
     setConfirmModal({
         show: true,
         title: 'Rejeitar Solicitação?',
@@ -351,7 +351,7 @@ export default function UserManagement() {
     });
   };
 
-  const handleUserAction = (type: 'suspend' | 'ban' | 'activate' | 'delete' | 'config', user: User) => {
+  const handleUserAction = (type, user) => {
     if (type === 'config') { exportTenantBackup(user.tenantId); return; }
     
     const isTargetMaster = user.tenantId === 'MASTER' && user.role === 'admin';
@@ -400,7 +400,7 @@ export default function UserManagement() {
     return today > expiry && matchesSearch;
   });
 
-  const getStatusInfo = (user: User) => {
+  const getStatusInfo = (user) => {
     const today = new Date();
     const deactMsg = (user.deactivatedMessage || '').toUpperCase();
     if (!user.active && deactMsg.includes('BANIDO')) return { label: 'Banido', color: 'bg-rose-600 text-white', status: 'banned' };
@@ -422,7 +422,7 @@ export default function UserManagement() {
     return { label: 'Ativo', color: 'bg-emerald-500 text-white', status: 'active' };
   };
 
-  const getTabClass = (tabId: typeof activeTab) => {
+  const getTabClass = (tabId) => {
     const isActive = activeTab === tabId;
     return `px-6 md:px-10 py-3.5 md:py-3 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300 active:scale-95 ${
       isActive 
@@ -738,7 +738,7 @@ export default function UserManagement() {
                                disabled={editingUser?.tenantId === 'MASTER' && editingUser?.role === 'admin'}
                                value={formData.role} 
                                onChange={e => {
-                                  const newRole = e.target.value as any;
+                                  const newRole = e.target.value;
                                   handleInputChange('role', newRole);
                                   if (newRole === 'demo' && !formData.expiresAt) {
                                     const d = new Date();

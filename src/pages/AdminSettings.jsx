@@ -104,7 +104,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     { id: 'settings', label: 'Configurações do Menu' }
   ];
 
-  const handleUpdate = (updates: Partial<AppSettings>) => {
+  const handleUpdate = (updates) => {
     setLocalSettings(prev => ({ ...prev, ...updates }));
   };
 
@@ -121,7 +121,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        handleUpdate({ logoUrl: reader.result as string });
+        handleUpdate({ logoUrl: reader.result });
         e.target.value = '';
       };
       reader.readAsDataURL(file);
@@ -133,7 +133,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string;
+      const base64Data = event.target?.result;
       if (base64Data) { handleUpdate({ [field]: base64Data }); e.target.value = ''; }
     };
     reader.readAsDataURL(file);
@@ -161,7 +161,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string;
+      const base64Data = event.target?.result;
       if (base64Data) {
         handleUpdate({ loginMarketingImageUrl: base64Data });
         e.target.value = '';
@@ -188,7 +188,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64Data = event.target?.result as string;
+      const base64Data = event.target?.result;
       if (base64Data) {
         handleUpdate({ loginBoxBorderImageUrl: base64Data });
         e.target.value = '';
@@ -202,7 +202,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const content = event.target?.result as string;
+        const content = event.target?.result;
         if (importFullBackup(content)) {
           alert('Backup restaurado com sucesso! O sistema será reinicializado.');
           window.location.reload();
@@ -228,12 +228,12 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
 
   const removeCategory = (id) => {
     if (id === 'master') return;
-    const currentStructure = JSON.parse(JSON.stringify(localSettings.menuStructure || DEFAULT_MENU_STRUCTURE)).filter((c: MenuCategory) => c.id !== id);
+    const currentStructure = JSON.parse(JSON.stringify(localSettings.menuStructure || DEFAULT_MENU_STRUCTURE)).filter((c) => c.id !== id);
     handleUpdate({ menuStructure: currentStructure });
     setConfirmDeleteCat(null);
   };
 
-  const moveCategory = (index: number, direction: 'up' | 'down') => {
+  const moveCategory = (index, direction) => {
     const struct = JSON.parse(JSON.stringify(localSettings.menuStructure || DEFAULT_MENU_STRUCTURE));
     if (direction === 'up' && index > 0) {
       [struct[index], struct[index - 1]] = [struct[index - 1], struct[index]];
@@ -243,7 +243,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     handleUpdate({ menuStructure: struct });
   };
 
-  const moveItemOrder = (catIdx: number, itemIdx: number, direction: 'up' | 'down') => {
+  const moveItemOrder = (catIdx, itemIdx, direction) => {
     const struct = JSON.parse(JSON.stringify(localSettings.menuStructure || DEFAULT_MENU_STRUCTURE));
     const items = [...struct[catIdx].items];
     if (direction === 'up' && itemIdx > 0) {
@@ -255,13 +255,13 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     handleUpdate({ menuStructure: struct });
   };
 
-  const updateItemLabel = (id: string, label: string) => {
+  const updateItemLabel = (id, label) => {
     const labels = { ...(localSettings.customLabels || {}) };
     labels[`menu_${id}`] = label.toUpperCase();
     handleUpdate({ customLabels: labels });
   };
 
-  const updateItemShortcut = (id: string, key: string) => {
+  const updateItemShortcut = (id, key) => {
     const shortcuts = { ...(localSettings.menuShortcuts || {}) };
     if (!key) {
       delete shortcuts[id];
@@ -278,14 +278,14 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     let struct = JSON.parse(JSON.stringify(localSettings.menuStructure || DEFAULT_MENU_STRUCTURE));
     
     // Remover de todas as categorias primeiro para garantir que não haja duplicatas
-    struct = struct.map((cat: MenuCategory) => ({
+    struct = struct.map((cat) => ({
       ...cat,
       items: cat.items.filter(i => i !== viewId)
     }));
 
     // Se o destino não for 'none', adicionar à categoria de destino
     if (toCatId !== 'none') {
-      struct = struct.map((cat: MenuCategory) => {
+      struct = struct.map((cat) => {
         if (cat.id === toCatId) {
           return { ...cat, items: [...cat.items, viewId] };
         }
@@ -310,7 +310,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
           if (key.startsWith('menu_')) delete newLabels[key];
         });
 
-        const updatedSettings: AppSettings = { 
+        const updatedSettings = { 
           ...localSettings, 
           menuStructure: defaultCopy,
           menuShortcuts: {},
@@ -331,7 +331,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     });
   };
 
-  const moveLoginButton = (index: number, direction: 'up' | 'down') => {
+  const moveLoginButton = (index, direction) => {
     const currentOrder = [...(localSettings.loginButtonsOrder || ['Plans', 'Request', 'Regularize', 'Support'])];
     if (direction === 'up' && index > 0) {
       [currentOrder[index], currentOrder[index - 1]] = [currentOrder[index - 1], currentOrder[index]];
@@ -342,7 +342,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
   };
 
   const restoreMarketingSettings = () => {
-    const marketingFields: (keyof AppSettings)[] = [
+    const marketingFields = [
       'loginSalesTitle', 'loginSalesTitleSize', 'loginSalesTitleX', 'loginSalesTitleY', 'loginSalesTitleAnim', 'loginSalesTitleColor', 'loginSalesTitleFont', 'loginSalesTitleWidth', 'loginSalesTitleHeight',
       'loginSalesText', 'loginSalesTextSize', 'loginSalesTextX', 'loginSalesTextY', 'loginSalesTextAnim', 'loginSalesTextColor', 'loginSalesTextFont', 'loginSalesTextWidth', 'loginSalesTextHeight',
       'loginFeatures', 'loginFeaturesX', 'loginFeaturesY', 'loginFeaturesAnimSpeed', 'loginFeaturesColor', 'loginFeaturesTextColor', 'loginFeaturesBorderRadius', 'loginFeaturesPadding', 'loginFeaturesGap', 'loginFeaturesAnimType',
@@ -353,10 +353,10 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
       'loginScreenBgColor', 'loginMarketingPrimaryColor', 'loginThematicBorder'
     ];
 
-    const restored: Partial<AppSettings> = {};
+    const restored = {};
     marketingFields.forEach(field => {
       if (field in DEFAULT_SETTINGS) {
-        (restored as any)[field] = (DEFAULT_SETTINGS as any)[field];
+        restored[field] = DEFAULT_SETTINGS[field];
       }
     });
 
@@ -369,12 +369,12 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
     const title = type === 'Plans' ? 'Botão: Nossos Planos' : type === 'Request' ? 'Botão: Solicitar Acesso' : type === 'Regularize' ? 'Botão: Regularização' : 'Botão: Suporte VIP';
     const themeColor = type === 'Plans' ? '#4f46e5' : type === 'Request' ? '#10b981' : type === 'Regularize' ? '#f59e0b' : '#059669';
 
-    const iconKey = `loginBtn${type}Icon` as keyof AppSettings;
-    const showIconKey = `loginBtn${type}ShowIcon` as keyof AppSettings;
-    const textKey = `loginBtn${type}Text` as keyof AppSettings;
-    const subtextKey = `loginBtn${type}Subtext` as keyof AppSettings;
-    const colorKey = `loginBtn${type}Color` as keyof AppSettings;
-    const textColorKey = `loginBtn${type}TextColor` as keyof AppSettings;
+    const iconKey = `loginBtn${type}Icon`;
+    const showIconKey = `loginBtn${type}ShowIcon`;
+    const textKey = `loginBtn${type}Text`;
+    const subtextKey = `loginBtn${type}Subtext`;
+    const colorKey = `loginBtn${type}Color`;
+    const textColorKey = `loginBtn${type}TextColor`;
     
     return (
       <div className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 space-y-6 relative group/box">
@@ -399,7 +399,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
             </div>
             <div className="flex flex-col items-center gap-2">
               <div className={`w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-opacity ${localSettings[showIconKey] === false ? 'opacity-30' : 'opacity-100'}`}>
-                {localSettings[iconKey] ? <img src={localSettings[iconKey] as string} className="w-full h-full object-contain p-2" alt="icon" /> : <svg className="w-6 h-6 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 01-1.586-1.586a2 2 0 012.828 0L20 14" strokeWidth={2}/></svg>}
+                {localSettings[iconKey] ? <img src={localSettings[iconKey]} className="w-full h-full object-contain p-2" alt="icon" /> : <svg className="w-6 h-6 text-slate-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 01-1.586-1.586a2 2 0 012.828 0L20 14" strokeWidth={2}/></svg>}
               </div>
               <div className="flex flex-col items-center gap-1">
                 <button type="button" onClick={() => iconRef.current?.click()} className="text-[7px] font-black uppercase text-indigo-600">Escolher Imagem</button>
@@ -413,21 +413,21 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
           <div className="space-y-3">
             <p className="text-[8px] font-black uppercase text-indigo-500 tracking-widest">2. Cores</p>
             <div className="grid grid-cols-2 gap-2">
-              <input type="color" value={localSettings[colorKey] as string || themeColor} onChange={e => handleUpdate({ [colorKey]: e.target.value })} className="w-8 h-8 rounded bg-transparent" title="Cor de Fundo" />
-              <input type="color" value={localSettings[textColorKey] as string || '#ffffff'} onChange={e => handleUpdate({ [textColorKey]: e.target.value })} className="w-8 h-8 rounded bg-transparent" title="Cor do Texto" />
+              <input type="color" value={localSettings[colorKey] || themeColor} onChange={e => handleUpdate({ [colorKey]: e.target.value })} className="w-8 h-8 rounded bg-transparent" title="Cor de Fundo" />
+              <input type="color" value={localSettings[textColorKey] || '#ffffff'} onChange={e => handleUpdate({ [textColorKey]: e.target.value })} className="w-8 h-8 rounded bg-transparent" title="Cor do Texto" />
             </div>
           </div>
           <div className="space-y-3">
             <p className="text-[8px] font-black uppercase text-indigo-500 tracking-widest">3. Textos</p>
-            <input value={localSettings[textKey] as string || ''} onChange={e => handleUpdate({ [textKey]: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-slate-900 border rounded-xl font-black text-[9px] uppercase outline-none focus:ring-1 focus:ring-indigo-500" placeholder="TEXTO PRINCIPAL" />
-            <input value={localSettings[subtextKey] as string || ''} onChange={e => handleUpdate({ [subtextKey]: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-slate-900 border rounded-xl font-bold text-[8px] uppercase outline-none focus:ring-1 focus:ring-indigo-500" placeholder="SUBTEXTO" />
+            <input value={localSettings[textKey] || ''} onChange={e => handleUpdate({ [textKey]: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-slate-900 border rounded-xl font-black text-[9px] uppercase outline-none focus:ring-1 focus:ring-indigo-500" placeholder="TEXTO PRINCIPAL" />
+            <input value={localSettings[subtextKey] || ''} onChange={e => handleUpdate({ [subtextKey]: e.target.value })} className="w-full px-3 py-2 bg-white dark:bg-slate-900 border rounded-xl font-bold text-[8px] uppercase outline-none focus:ring-1 focus:ring-indigo-500" placeholder="SUBTEXTO" />
           </div>
         </div>
       </div>
     );
   };
 
-  const getTabBtnClass = (tabId: typeof activeTab) => `tab-btn px-6 md:px-8 py-3.5 md:py-3 rounded-full text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+  const getTabBtnClass = (tabId) => `tab-btn px-6 md:px-8 py-3.5 md:py-3 rounded-full text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 ${
     activeTab === tabId 
       ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md' 
       : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
@@ -553,7 +553,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
               
               <div className="space-y-2">
                 <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Escolher Tema</label>
-                <select value={localSettings.sidebarTheme} onChange={e => handleUpdate({ sidebarTheme: e.target.value as any })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 font-black text-xs uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
+                <select value={localSettings.sidebarTheme} onChange={e => handleUpdate({ sidebarTheme: e.target.value })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl px-6 py-4 font-black text-xs uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
                     {sidebarThemes.map(t => (
                       <option key={t.id} value={t.id}>{t.label.toUpperCase()}</option>
                     ))}
@@ -773,7 +773,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                             <div className="w-full md:w-40 space-y-1">
                               <label className="text-[7px] font-black uppercase text-slate-400 block ml-1">Mover para</label>
                               <select 
-                                onChange={e => moveItemToCategory(itemId as View, cat.id, e.target.value)}
+                                onChange={e => moveItemToCategory(itemId, cat.id, e.target.value)}
                                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-xl font-black text-[9px] uppercase outline-none cursor-pointer"
                                 value={cat.id}
                               >
@@ -825,7 +825,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                             <div className="w-full md:w-40 space-y-1">
                               <label className="text-[7px] font-black uppercase text-slate-400 block ml-1">Mover para</label>
                               <select 
-                                onChange={e => moveItemToCategory(item.id as View, 'none', e.target.value)}
+                                onChange={e => moveItemToCategory(item.id, 'none', e.target.value)}
                                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-xl font-black text-[9px] uppercase outline-none cursor-pointer"
                                 value="none"
                               >
@@ -923,7 +923,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                         <label className="text-[9px] font-black uppercase text-slate-400 ml-2 tracking-widest">Tipo de Fundo da Tela</label>
                         <select 
                           value={localSettings.loginScreenBgType || 'color'} 
-                          onChange={e => handleUpdate({ loginScreenBgType: e.target.value as any })}
+                          onChange={e => handleUpdate({ loginScreenBgType: e.target.value })}
                           className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                         >
                           <option value="color">COR SÓLIDA</option>
@@ -937,7 +937,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                         <label className="text-[9px] font-black uppercase text-slate-400 ml-2 tracking-widest">Tema Animado (Efeito)</label>
                         <select 
                           value={localSettings.loginEffect || 'none'} 
-                          onChange={e => handleUpdate({ loginEffect: e.target.value as any })}
+                          onChange={e => handleUpdate({ loginEffect: e.target.value })}
                           className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl px-4 py-3 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner"
                         >
                           <option value="none">NENHUM EFEITO</option>
@@ -1001,11 +1001,11 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                                 const input = document.createElement('input');
                                 input.type = 'file';
                                 input.accept = localSettings.loginScreenBgType === 'video' ? 'video/mp4' : 'image/*';
-                                input.onchange = (e: any) => {
+                                input.onchange = (e) => {
                                   const file = e.target.files[0];
                                   if (file) {
                                     const reader = new FileReader();
-                                    reader.onload = (ev) => handleUpdate({ loginScreenBgUrl: ev.target?.result as string });
+                                    reader.onload = (ev) => handleUpdate({ loginScreenBgUrl: ev.target?.result });
                                     reader.readAsDataURL(file);
                                   }
                                 };
@@ -1170,7 +1170,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
                     <div className="space-y-3">
                        <label className="text-[9px] font-black uppercase text-slate-400 ml-2 tracking-widest">Alinhamento Marketing</label>
-                       <select value={localSettings.loginMarketingAlign || 'center'} onChange={e => handleUpdate({ loginMarketingAlign: e.target.value as any })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-[1.8rem] px-6 py-5 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
+                       <select value={localSettings.loginMarketingAlign || 'center'} onChange={e => handleUpdate({ loginMarketingAlign: e.target.value })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-[1.8rem] px-6 py-5 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
                           <option value="left">ESQUERDA</option>
                           <option value="center">CENTRO</option>
                           <option value="right">DIREITA</option>
@@ -1178,7 +1178,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
                     </div>
                     <div className="space-y-3">
                        <label className="text-[9px] font-black uppercase text-slate-400 ml-2 tracking-widest">Alinhamento do Box</label>
-                       <select value={localSettings.loginBoxPosition || 'center'} onChange={e => handleUpdate({ loginBoxPosition: e.target.value as any })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-[1.8rem] px-6 py-5 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
+                       <select value={localSettings.loginBoxPosition || 'center'} onChange={e => handleUpdate({ loginBoxPosition: e.target.value })} className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-[1.8rem] px-6 py-5 font-black text-[10px] uppercase outline-none focus:ring-2 focus:ring-indigo-500 shadow-inner">
                           <option value="left">ESQUERDA</option>
                           <option value="center">CENTRO</option>
                           <option value="right">DIREITA</option>
@@ -1213,7 +1213,7 @@ const AdminSettings = ({ settings, onUpdateSettings }) => {
           <div className="space-y-6 animate-in slide-in-from-bottom-4">
             {(localSettings.loginButtonsOrder || ['Plans', 'Request', 'Regularize', 'Support']).map((type, idx, arr) => (
                <React.Fragment key={type}>
-                  {renderButtonConfigGroup(type as any, idx, arr.length)}
+                  {renderButtonConfigGroup(type, idx, arr.length)}
                </React.Fragment>
             ))}
           </div>

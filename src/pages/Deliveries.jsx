@@ -1,57 +1,42 @@
 
 import React, { useState, useEffect } from 'react';
-import { Delivery, Sale, Product, SaleItem, AppSettings } from '../types';
 import { getDeliveries, removeDelivery, saveSale, getAppSettings, saveDelivery, saveAllDeliveries, getCurrentUser, DEFAULT_SETTINGS } from '../services/storage';
 import { Phone, MapPin, MessageCircle, ChevronDown, ChevronUp, Package, Clock, DollarSign } from 'lucide-react';
 
-interface DeliveriesProps {
-  onRefresh?: () => void;
-  products?: Product[];
-}
-
-interface Balloon {
-  id: number;
-  left: number;
-  speed: number;
-  color: string;
-  delay: number;
-  scale: number;
-}
-
-const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => {
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-  const [confirmCancel, setConfirmCancel] = useState<string | null>(null);
+const Deliveries = ({ onRefresh, products = [] }) => {
+  const [deliveries, setDeliveries] = useState([]);
+  const [confirmCancel, setConfirmCancel] = useState(null);
   
   // States para o Modal de Pagamento
-  const [deliveryToFinish, setDeliveryToFinish] = useState<Delivery | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<Sale['paymentMethod'] | null>(null);
-  const [amountReceived, setAmountReceived] = useState<string>('');
+  const [deliveryToFinish, setDeliveryToFinish] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [amountReceived, setAmountReceived] = useState('');
   const [isFinishing, setIsFinishing] = useState(false);
   const [showCashFlow, setShowCashFlow] = useState(false);
   
   // State para Impressão
-  const [deliveryToPrint, setDeliveryToPrint] = useState<Delivery | null>(null);
+  const [deliveryToPrint, setDeliveryToPrint] = useState(null);
 
   // States para Edição de Entrega
-  const [editingDelivery, setEditingDelivery] = useState<Delivery | null>(null);
+  const [editingDelivery, setEditingDelivery] = useState(null);
   const [editName, setEditName] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editReference, setEditReference] = useState('');
   const [editChangeFor, setEditChangeFor] = useState('');
-  const [editPaymentMethod, setEditPaymentMethod] = useState<Delivery['paymentMethod']>('Dinheiro');
-  const [editCart, setEditCart] = useState<SaleItem[]>([]);
+  const [editPaymentMethod, setEditPaymentMethod] = useState('Dinheiro');
+  const [editCart, setEditCart] = useState([]);
   const [editPaid, setEditPaid] = useState(false);
   const [productSearch, setProductSearch] = useState('');
   
   const [manualName, setManualName] = useState('');
   const [manualPrice, setManualPrice] = useState('');
 
-  const [expandedDeliveries, setExpandedDeliveries] = useState<Record<string, boolean>>({});
-  const [celebrationBalloons, setCelebrationBalloons] = useState<Balloon[]>([]);
+  const [expandedDeliveries, setExpandedDeliveries] = useState({});
+  const [celebrationBalloons, setCelebrationBalloons] = useState([]);
   
   // getAppSettings is asynchronous, using DEFAULT_SETTINGS initially.
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     // Fix: Await getAppSettings in useEffect to fetch actual settings object
@@ -75,7 +60,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setDeliveries(sorted);
   };
 
-  const handleMove = async (e: React.MouseEvent, id: string, direction: 'up' | 'down') => {
+  const handleMove = async (e, id, direction) => {
     e.stopPropagation();
     const index = deliveries.findIndex(d => d.id === id);
     if (index === -1) return;
@@ -91,7 +76,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setDeliveries(updated);
   };
 
-  const handleStartFinish = (e: React.MouseEvent, delivery: Delivery) => {
+  const handleStartFinish = (e, delivery) => {
     e.stopPropagation();
     setDeliveryToFinish(delivery);
     setPaymentMethod(delivery.paymentMethod || null);
@@ -107,7 +92,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setIsFinishing(false);
   };
 
-  const selectPayment = (method: Sale['paymentMethod']) => {
+  const selectPayment = (method) => {
     setPaymentMethod(method);
     if (method === 'Dinheiro') setShowCashFlow(true);
     else setShowCashFlow(false);
@@ -115,7 +100,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
 
   const triggerCelebration = () => {
     const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#ec4899', '#06b6d4'];
-    const balloons: Balloon[] = Array.from({ length: 30 }).map((_, i) => ({
+    const balloons = Array.from({ length: 30 }).map((_, i) => ({
       id: Date.now() + i,
       left: Math.random() * 100,
       speed: 3 + Math.random() * 3,
@@ -131,7 +116,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setIsFinishing(true);
     try {
         const user = getCurrentUser();
-        const sale: Sale = {
+        const sale = {
             id: Math.random().toString(36).substring(2, 11),
             date: new Date().toISOString(),
             items: deliveryToFinish.items,
@@ -166,7 +151,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     }
   };
 
-  const handleCancelDelivery = async (e: React.MouseEvent, id: string) => {
+  const handleCancelDelivery = async (e, id) => {
     e.stopPropagation();
     if (confirmCancel === id) {
         // Fix: await storage call
@@ -180,23 +165,23 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     }
   };
 
-  const toggleStatus = async (e: React.MouseEvent, delivery: Delivery) => {
+  const toggleStatus = async (e, delivery) => {
     e.stopPropagation();
     const newStage = delivery.deliveryStage === 'active' ? 'paused' : 'active';
-    const updatedDelivery: Delivery = { ...delivery, deliveryStage: newStage };
+    const updatedDelivery = { ...delivery, deliveryStage: newStage };
     // Fix: await storage call
     await saveDelivery(updatedDelivery);
     loadDeliveries();
     if (onRefresh) onRefresh();
   };
 
-  const handlePrint = (e: React.MouseEvent, delivery: Delivery) => {
+  const handlePrint = (e, delivery) => {
     e.stopPropagation();
     setDeliveryToPrint(delivery);
     setTimeout(() => window.print(), 50);
   };
 
-  const handleEdit = (e: React.MouseEvent, delivery: Delivery) => {
+  const handleEdit = (e, delivery) => {
     e.stopPropagation();
     setEditingDelivery(delivery);
     setEditName(delivery.customerName);
@@ -212,7 +197,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setManualPrice('');
   };
 
-  const addToEditCart = (product: Product) => {
+  const addToEditCart = (product) => {
     const existing = editCart.find(item => item.productId === product.id && !item.observation);
     if (existing) {
       setEditCart(editCart.map(item => item === existing ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.price } : item));
@@ -222,20 +207,20 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
     setProductSearch('');
   };
 
-  const adjustEditQty = (productId: string, delta: number, observation?: string) => {
+  const adjustEditQty = (productId, delta, observation) => {
     setEditCart(prev => prev.map(item => {
       if (item.productId === productId && item.observation === observation) {
         const newQty = item.quantity + delta;
         return newQty > 0 ? { ...item, quantity: newQty, subtotal: newQty * item.price } : null;
       }
       return item;
-    }).filter(Boolean) as SaleItem[]);
+    }).filter(Boolean));
   };
 
   const handleSaveEdit = async () => {
     if (!editingDelivery) return;
     const newTotal = editCart.reduce((acc, item) => acc + item.subtotal, 0);
-    const updatedDelivery: Delivery = { 
+    const updatedDelivery = { 
         ...editingDelivery, 
         customerName: editName, 
         phone: editPhone.replace(/\D/g, ''), 
@@ -258,13 +243,13 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
   const change = Number(amountReceived) > total ? Number(amountReceived) - total : 0;
   const filteredProducts = productSearch.length > 1 ? products.filter(p => p.name.toLowerCase().includes(productSearch.toLowerCase())) : [];
 
-  const formatWhatsAppLink = (phone?: string) => {
+  const formatWhatsAppLink = (phone) => {
     if (!phone) return null;
     const cleanNumber = phone.replace(/\D/g, '');
     return `https://wa.me/55${cleanNumber}`;
   };
 
-  const toggleExpand = (e: React.MouseEvent, id: string) => {
+  const toggleExpand = (e, id) => {
     e.stopPropagation();
     setExpandedDeliveries(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -500,7 +485,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
                         <div className="grid grid-cols-2 gap-3">
                             <select 
                                 value={editPaymentMethod} 
-                                onChange={e => setEditPaymentMethod(e.target.value as any)}
+                                onChange={e => setEditPaymentMethod(e.target.value)}
                                 className="w-full px-4 py-3 bg-white dark:bg-slate-900 rounded-xl text-xs font-black uppercase outline-none border border-slate-200 dark:border-slate-700"
                             >
                                 <option value="Dinheiro">DINHEIRO</option>
@@ -527,7 +512,7 @@ const Deliveries: React.FC<DeliveriesProps> = ({ onRefresh, products = [] }) => 
               <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
                  <div className="text-center py-8 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-700"><span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-1">Valor Total</span><span className="text-5xl font-black italic tracking-tighter text-slate-900 dark:text-white">R$ {total.toFixed(2)}</span></div>
                  {!showCashFlow ? (
-                    <div className="space-y-3"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Confirmar Forma de Pagamento</p><div className="grid grid-cols-1 gap-3">{['Pix', 'Cartão', 'Dinheiro'].map((m) => (<button key={m} onClick={() => selectPayment(m as any)} className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black uppercase text-xs tracking-widest transition-all ${paymentMethod === m ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500'}`}>{m}{paymentMethod === m && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}</button>))}</div></div>
+                    <div className="space-y-3"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Confirmar Forma de Pagamento</p><div className="grid grid-cols-1 gap-3">{['Pix', 'Cartão', 'Dinheiro'].map((m) => (<button key={m} onClick={() => selectPayment(m)} className={`flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black uppercase text-xs tracking-widest transition-all ${paymentMethod === m ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-500'}`}>{m}{paymentMethod === m && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}</button>))}</div></div>
                  ) : (
                     <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
                        <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase ml-4 tracking-widest">Valor Recebido</label><input type="number" autoFocus value={amountReceived} onChange={e => setAmountReceived(e.target.value)} className="w-full px-8 py-6 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] font-black text-4xl outline-none border-2 border-slate-100 dark:border-slate-700 focus:border-emerald-500 text-center" placeholder="0.00" /></div>

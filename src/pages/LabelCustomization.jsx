@@ -1,16 +1,10 @@
 
 import React, { useState } from 'react';
-import { AppSettings } from '../types';
 import { saveAppSettings } from '../services/storage';
 
-interface LabelCustomizationProps {
-  settings: AppSettings;
-  onUpdateSettings: (settings: AppSettings) => void;
-}
-
-const LabelCustomization: React.FC<LabelCustomizationProps> = ({ settings, onUpdateSettings }) => {
-  const [localLabels, setLocalLabels] = useState<Record<string, string>>(settings.customLabels || {});
-  const [activeCategory, setActiveCategory] = useState<'menus' | 'titles' | 'ui'>('menus');
+const LabelCustomization = ({ settings, onUpdateSettings }) => {
+  const [localLabels, setLocalLabels] = useState(settings.customLabels || {});
+  const [activeCategory, setActiveCategory] = useState('menus');
   const [showToast, setShowToast] = useState(false);
 
   const categories = {
@@ -37,7 +31,7 @@ const LabelCustomization: React.FC<LabelCustomizationProps> = ({ settings, onUpd
     ]
   };
 
-  const handleUpdate = (key: string, value: string) => {
+  const handleUpdate = (key, value) => {
     setLocalLabels(prev => ({ ...prev, [key]: value }));
   };
 
@@ -49,7 +43,7 @@ const LabelCustomization: React.FC<LabelCustomizationProps> = ({ settings, onUpd
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  const handleReset = (key: string) => {
+  const handleReset = (key) => {
     const newLabels = { ...localLabels };
     delete newLabels[key];
     setLocalLabels(newLabels);
@@ -78,7 +72,7 @@ const LabelCustomization: React.FC<LabelCustomizationProps> = ({ settings, onUpd
       </div>
 
       <div className="flex bg-slate-200 dark:bg-slate-800 p-1.5 rounded-[2rem] w-fit mx-auto shadow-inner mb-8">
-        {(['menus', 'titles', 'ui'] as const).map(cat => (
+        {['menus', 'titles', 'ui'].map(cat => (
           <button 
             key={cat}
             onClick={() => setActiveCategory(cat)}

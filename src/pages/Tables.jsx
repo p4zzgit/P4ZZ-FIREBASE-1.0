@@ -1,23 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Table, Product, SaleItem, Sale, Category } from '../types';
 import { 
   getTables, saveTables, saveSale, getCategories, 
   getAppSettings, getCurrentUser, DEFAULT_SETTINGS,
   notifyDataChanged
 } from '../services/storage';
 
-interface TablesProps {
-  products: Product[];
-  onBack: () => void;
-  onUpdate: () => void;
-}
-
-const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
-  const [tables, setTables] = useState<Table[]>([]);
-  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+const Tables = ({ products, onBack, onUpdate }) => {
+  const [tables, setTables] = useState([]);
+  const [selectedTable, setSelectedTable] = useState(null);
   const [search, setSearch] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [printMode, setPrintMode] = useState<'customer' | 'kitchen'>('customer');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('all');
+  const [printMode, setPrintMode] = useState('customer');
   const [isLoading, setIsLoading] = useState(true);
   
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -28,21 +21,21 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
   const [manualObs, setManualObs] = useState('');
 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<Sale['paymentMethod'] | null>(null);
-  const [amountReceived, setAmountReceived] = useState<string>(''); // Vazio por padrão
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [amountReceived, setAmountReceived] = useState(''); // Vazio por padrão
   const [showCashFlow, setShowCashFlow] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showSafetyLock, setShowSafetyLock] = useState(false);
   const [showPrintConfirm, setShowPrintConfirm] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
-  const [selectedTransferTableId, setSelectedTransferTableId] = useState<number | null>(null);
+  const [selectedTransferTableId, setSelectedTransferTableId] = useState(null);
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState([]);
   
   // REFERÊNCIAS PARA FOCO
-  const tableSearchInputRef = useRef<HTMLInputElement>(null);
-  const cashInputRef = useRef<HTMLInputElement>(null);
+  const tableSearchInputRef = useRef(null);
+  const cashInputRef = useRef(null);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -85,7 +78,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     setShowPrintConfirm(false);
   };
 
-  const toggleTable = (table: Table) => {
+  const toggleTable = (table) => {
     setSelectedTable(table);
     setTempLabel(table.label);
     setSelectedCategoryId('all');
@@ -94,7 +87,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     resetPaymentFlow();
   };
 
-  const handlePrintAction = (mode: 'customer' | 'kitchen') => { 
+  const handlePrintAction = (mode) => { 
     setPrintMode(mode);
     setTimeout(() => {
       window.print();
@@ -102,7 +95,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     }, 100);
   };
 
-  const initiatePayment = (method: Sale['paymentMethod']) => {
+  const initiatePayment = (method) => {
     setSelectedMethod(method);
     if (method === 'Dinheiro') {
       setAmountReceived(''); 
@@ -111,9 +104,9 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     else setShowSafetyLock(true);
   };
 
-  const handleUpdateTableData = useCallback(async (updates: Partial<Table>) => {
+  const handleUpdateTableData = useCallback(async (updates) => {
     if (!selectedTable) return;
-    const updatedTable = { ...selectedTable, ...updates } as Table;
+    const updatedTable = { ...selectedTable, ...updates };
     
     if (updatedTable.items.length > 0 && updatedTable.status === 'Livre') {
         updatedTable.status = 'Em andamento';
@@ -164,7 +157,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
           items: newItems,
           startTime: selectedTable.startTime || new Date().toISOString(),
           notes: selectedTable.notes || ''
-        } as Table;
+        };
       }
       if (t.id === selectedTable.id) {
         return {
@@ -173,7 +166,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
           items: [],
           startTime: undefined,
           notes: ''
-        } as Table;
+        };
       }
       return t;
     });
@@ -192,7 +185,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     setSelectedTransferTableId(null);
   };
 
-  const addToTable = (product: Product) => {
+  const addToTable = (product) => {
     if (!selectedTable) return;
     if (product.stock <= 0) {
       alert("Estoque insuficiente para este item.");
@@ -212,7 +205,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     handleUpdateTableData({ items: newItems });
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
       const barcodeValue = search.trim();
       if (!barcodeValue) return;
@@ -234,7 +227,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
       const totalVal = selectedTable.items.reduce((acc, i) => acc + i.subtotal, 0);
       const user = getCurrentUser();
       
-      const saleToSave: Sale = { 
+      const saleToSave = { 
         id: Math.random().toString(36).substring(2, 11), 
         date: new Date().toISOString(), 
         items: [...selectedTable.items], 
@@ -256,7 +249,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
           window.print();
         }
         const currentTables = await getTables();
-        const updatedTables = currentTables.map(t => t.id === selectedTable.id ? { ...t, status: 'Livre', items: [], startTime: undefined, notes: '' } as Table : t);
+        const updatedTables = currentTables.map(t => t.id === selectedTable.id ? { ...t, status: 'Livre', items: [], startTime: undefined, notes: '' } : t);
         await saveTables(updatedTables); 
         setTables(updatedTables); 
         setSelectedTable(null);
@@ -285,7 +278,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
     if (!selectedTable || !manualName || !manualPrice) return;
     const price = Number(manualPrice);
     if (isNaN(price)) return;
-    const newItem: SaleItem = {
+    const newItem = {
       productId: `manual-${Date.now()}`,
       productName: manualName.toUpperCase(),
       quantity: 1,
@@ -340,7 +333,7 @@ const Tables: React.FC<TablesProps> = ({ products, onBack, onUpdate }) => {
          <div className="flex flex-col"><h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-500 italic">Gestão de Mesas</h3><p className="text-[8px] font-bold text-slate-400 uppercase">{tables.length} Terminais Ativos</p></div>
          <div className="flex gap-2">
             <button onClick={async () => { if(tables.length > 0) { const updated = tables.slice(0, -1); await saveTables(updated); setTables(updated); } }} className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-xl font-black text-[9px] uppercase hover:bg-rose-50 transition-colors">- Remover</button>
-            <button onClick={async () => { const newId = Math.max(0, ...tables.map(t=>t.id)) + 1; const newT: Table = { id: newId, label: newId.toString().padStart(2, '0'), status: 'Livre', items: [], notes: '' }; const updated = [...tables, newT]; await saveTables(updated); setTables(updated); }} className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl font-black text-[9px] uppercase hover:bg-indigo-100 transition-colors">+ Adicionar</button>
+            <button onClick={async () => { const newId = Math.max(0, ...tables.map(t=>t.id)) + 1; const newT = { id: newId, label: newId.toString().padStart(2, '0'), status: 'Livre', items: [], notes: '' }; const updated = [...tables, newT]; await saveTables(updated); setTables(updated); }} className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl font-black text-[9px] uppercase hover:bg-indigo-100 transition-colors">+ Adicionar</button>
          </div>
       </div>
 

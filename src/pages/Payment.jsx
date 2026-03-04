@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import type { PaymentRequest, User, AppSettings, Plan } from '../types';
 import { 
   getPaymentRequests, 
   savePaymentRequest, 
@@ -14,47 +13,42 @@ import {
   DEFAULT_SETTINGS
 } from '../services/storage';
 import { createPixPayment, checkPaymentStatus } from '../services/mercadoPago';
-import type { PixPaymentResponse } from '../services/mercadoPago';
 
 // Helper de Mascaramento de Segurança (Para exibição pública)
-const maskDocumentSafe = (val: string = '') => {
+const maskDocumentSafe = (val = '') => {
   const v = val.replace(/\D/g, '');
   if (v.length === 11) return `${v.slice(0, 3)}.***.***-${v.slice(-2)}`;
   if (v.length === 14) return `${v.slice(0, 2)}.***.***/****-${v.slice(-2)}`;
   return v.length > 2 ? `${v.slice(0, 2)}...${v.slice(-2)}` : v;
 };
 
-interface PaymentProps {
-  onUpdate?: () => void;
-}
-
-const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
+const Payment = ({ onUpdate }) => {
   const user = useMemo(() => getCurrentUser(), []);
   const isAdmin = user?.role === 'admin';
   const isMaster = user?.tenantId === 'MASTER' && isAdmin;
   
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [requests, setRequests] = useState<PaymentRequest[]>([]);
-  const [systemUsers, setSystemUsers] = useState<User[]>([]);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [requests, setRequests] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
   
   // --- STATES PARA CLIENTE ---
-  const [paymentMode, setPaymentMode] = useState<'manual' | 'pix'>('pix');
+  const [paymentMode, setPaymentMode] = useState('pix');
   const [customerMessage, setCustomerMessage] = useState('');
-  const [receiptImage, setReceiptImage] = useState<string>('');
+  const [receiptImage, setReceiptImage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef(null);
 
   // States PIX Automático
-  const [pixAmount, setPixAmount] = useState<number>(0);
-  const [pixData, setPixData] = useState<PixPaymentResponse | null>(null);
-  const [pixStatus, setPixStatus] = useState<string>('pending');
+  const [pixAmount, setPixAmount] = useState(0);
+  const [pixData, setPixData] = useState(null);
+  const [pixStatus, setPixStatus] = useState('pending');
   const [isGeneratingPix, setIsGeneratingPix] = useState(false);
 
   // --- STATES PARA ADMIN ---
-  const [confirmAction, setConfirmAction] = useState<{ type: 'approve' | 'reject', req: PaymentRequest } | null>(null);
+  const [confirmAction, setConfirmAction] = useState(null);
   const [adminMessage, setAdminMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [activeTab, setActiveTab] = useState('pending');
   const [isConfiguring, setIsConfiguring] = useState(false);
 
   const loadRequests = useCallback(async () => {
@@ -63,9 +57,9 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
     setSystemUsers(users);
   }, []);
 
-  const handlePixPaymentNotification = useCallback(async (mpId: string, amount: number) => {
+  const handlePixPaymentNotification = useCallback(async (mpId, amount) => {
     if (!user) return;
-    const newRequest: PaymentRequest = {
+    const newRequest = {
         id: Math.random().toString(36).substr(2, 9),
         userId: user.id,
         tenantId: user.tenantId,
@@ -98,7 +92,7 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
 
   // Monitoramento de status do PIX (Estabilizado para evitar travamentos)
   useEffect(() => {
-    let interval: any;
+    let interval;
     if (pixData && pixStatus === 'pending') {
       interval = setInterval(async () => {
         try {
@@ -115,7 +109,7 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
     return () => { if(interval) clearInterval(interval); };
   }, [pixData, pixStatus, pixAmount, handlePixPaymentNotification]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 15 * 1024 * 1024) {
@@ -123,12 +117,12 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
         return;
       }
       const reader = new FileReader();
-      reader.onloadend = () => setReceiptImage(reader.result as string);
+      reader.onloadend = () => setReceiptImage(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmitManual = async (e: React.FormEvent) => {
+  const handleSubmitManual = async (e) => {
     e.preventDefault();
     if (!user || !receiptImage) {
         alert("Anexe o comprovante.");
@@ -137,7 +131,7 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
     setIsSubmitting(true);
     
     try {
-      const newRequest: PaymentRequest = {
+      const newRequest = {
         id: Math.random().toString(36).substr(2, 9),
         userId: user.id,
         tenantId: user.tenantId,
@@ -170,7 +164,7 @@ const Payment: React.FC<PaymentProps> = ({ onUpdate }) => {
     try {
       const data = await createPixPayment(pixAmount, `Renovação ${user.name}`, user.email);
       if (data) { setPixData(data); setPixStatus('pending'); }
-    } catch (err: any) {
+    } catch (err) {
         alert(err.message || "Erro ao gerar PIX");
     } finally { setIsGeneratingPix(false); }
   };

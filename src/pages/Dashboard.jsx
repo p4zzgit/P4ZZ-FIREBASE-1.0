@@ -37,7 +37,7 @@ const Dashboard = ({ products, sales, expenses }) => {
     }
   };
 
-  const filterByPeriod = (item: { date: string }) => {
+  const filterByPeriod = (item) => {
     const itemDate = new Date(item.date);
     const itemDayStr = itemDate.toLocaleDateString('en-CA');
     const todayStr = new Date().toLocaleDateString('en-CA');
@@ -172,7 +172,7 @@ const Dashboard = ({ products, sales, expenses }) => {
                 <h3 className="text-sm font-black uppercase tracking-widest italic text-slate-800 dark:text-white">Fluxo Financeiro</h3>
                 <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl w-full sm:w-auto overflow-x-auto whitespace-nowrap no-print scrollbar-hide">
                   {['today', '7d', 'all'].map(p => (
-                    <button key={p} onClick={() => setPeriod(p as any)} className={`flex-1 sm:flex-none px-5 py-3 md:py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all active:scale-95 ${period === p ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md' : 'text-slate-500'}`}>
+                    <button key={p} onClick={() => setPeriod(p)} className={`flex-1 sm:flex-none px-5 py-3 md:py-2 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all active:scale-95 ${period === p ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md' : 'text-slate-500'}`}>
                       {p === '7d' ? '7 Dias' : p === 'today' ? 'Hoje' : 'Tudo'}
                     </button>
                   ))}

@@ -1,30 +1,23 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Product, Category } from '../types';
 import { saveProducts, getCategories, getProducts } from '../services/storage';
 import { LOW_STOCK_LIMIT } from '@/constants';
 
-interface ProductListProps {
-  products: Product[];
-  onUpdate: () => void;
-  initialTab?: 'products' | 'low-stock';
-}
-
-export const ProductList: React.FC<ProductListProps> = ({ products: initialProducts, onUpdate, initialTab = 'products' }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
+export const ProductList = ({ products: initialProducts, onUpdate, initialTab = 'products' }) => {
+  const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCostField, setShowCostField] = useState(false);
-  const [activeTab, setActiveTab] = useState<'products' | 'low-stock'>(initialTab);
+  const [activeTab, setActiveTab] = useState(initialTab);
   
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
   
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [confirmDelete, setConfirmDelete] = useState<{ id: string, name: string } | null>(null);
+  const [errors, setErrors] = useState({});
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const [formData, setFormData] = useState<Partial<Product>>({
+  const [formData, setFormData] = useState({
     name: '', categoryId: '', category: '', price: 0, cost: 0, stock: 0, description: '', barcode: ''
   });
 
@@ -34,7 +27,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
     }
   }, [isModalOpen]);
 
-  const openModal = (product?: Product) => {
+  const openModal = (product) => {
     setErrors({});
     if (product) {
       setEditingProduct(product);
@@ -58,7 +51,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors = {};
     if (!formData.name?.trim()) newErrors.name = "O nome do item é obrigatório.";
     if (!formData.categoryId) newErrors.categoryId = "Selecione uma categoria.";
     if (!formData.price || formData.price <= 0) newErrors.price = "Informe um preço de venda válido.";
@@ -82,9 +75,9 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
     const currentProducts = await getProducts();
     let newProducts = [...currentProducts];
     if (editingProduct) {
-      newProducts = newProducts.map(p => p.id === editingProduct.id ? { ...editingProduct, ...finalData } as Product : p);
+      newProducts = newProducts.map(p => p.id === editingProduct.id ? { ...editingProduct, ...finalData } : p);
     } else {
-      const newProd: Product = { ...finalData, id: Math.random().toString(36).substr(2, 9) } as Product;
+      const newProd = { ...finalData, id: Math.random().toString(36).substr(2, 9) };
       newProducts.push(newProd);
     }
     await saveProducts(newProducts);
@@ -117,7 +110,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
 
     const sorted = [...filteredByTab].sort((a, b) => a.name.localeCompare(b.name));
 
-    const groups: Record<string, Product[]> = {};
+    const groups = {};
     filteredByTab.forEach(p => {
       const catName = (p.category || 'GERAL').toUpperCase();
       if (!groups[catName]) groups[catName] = [];
@@ -127,7 +120,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
     return { regularGroups: groups, allItemsFiltered: sorted };
   }, [initialProducts, searchTerm, activeTab]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -186,7 +179,7 @@ export const ProductList: React.FC<ProductListProps> = ({ products: initialProdu
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {(Object.entries(regularGroups) as [string, Product[]][]).map(([cat, items]) => (
+              {Object.entries(regularGroups).map(([cat, items]) => (
                 <React.Fragment key={cat}>
                   <tr className="bg-slate-50 dark:bg-slate-800/40">
                     <td colSpan={4} className="px-8 py-2 text-[10px] font-black text-indigo-500 uppercase tracking-widest italic border-y dark:border-slate-800">📁 {cat}</td>

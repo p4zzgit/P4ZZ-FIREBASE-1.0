@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Category } from '../types';
 import { getCategories, saveCategories } from '../services/storage';
 
-const CategoryManagement: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+const CategoryManagement = () => {
+  const [categories, setCategories] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [catName, setCatName] = useState('');
   const [catIdRef, setCatIdRef] = useState('');
   
   // Estado para o modal de confirmação de exclusão
-  const [confirmDelete, setConfirmDelete] = useState<{ id: string, name: string } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   // Fix: Awaited asynchronous fetching of categories
   useEffect(() => {
     getCategories().then(setCategories);
   }, []);
 
-  const openModal = (cat?: Category) => {
+  const openModal = (cat) => {
     if (cat) {
       setEditingCategory(cat);
       setCatName(cat.name);
@@ -31,13 +30,13 @@ const CategoryManagement: React.FC = () => {
   };
 
   /* Fix: Changed handleSave to be async to handle awaited getCategories() */
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!catName.trim()) return;
 
     // Fix: Awaited getCategories()
     const currentCategories = await getCategories();
-    let updated: Category[];
+    let updated;
 
     if (editingCategory) {
       updated = currentCategories.map(c => 
@@ -46,7 +45,7 @@ const CategoryManagement: React.FC = () => {
           : c
       );
     } else {
-      const newCat: Category = {
+      const newCat = {
         id: 'cat-' + Math.random().toString(36).substr(2, 5),
         name: catName.toUpperCase(),
         idRef: catIdRef.toUpperCase()

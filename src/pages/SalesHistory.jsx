@@ -1,24 +1,17 @@
-
 import React from 'react';
-import { Sale, Table } from '../types';
 import { deleteSale, getTables, saveTables } from '../services/storage';
 
-interface SalesHistoryProps {
-  sales: Sale[];
-  onRefresh?: () => void;
-}
-
-const SalesHistory: React.FC<SalesHistoryProps> = ({ sales, onRefresh }) => {
+const SalesHistory = ({ sales, onRefresh }) => {
   const reversedSales = [...sales].reverse();
 
-  const handleRemoveSale = async (sale: Sale) => {
+  const handleRemoveSale = async (sale) => {
     if (window.confirm("Deseja realmente remover esta venda? O estoque será estornado.")) {
       await deleteSale(sale.id);
       if (onRefresh) onRefresh();
     }
   };
 
-  const handleReopenTable = async (sale: Sale) => {
+  const handleReopenTable = async (sale) => {
     if (!sale.tableNumber) return;
     const confirm = window.confirm(`Reabrir Mesa ${sale.tableNumber}? Os itens voltarão para a mesa.`);
     if (confirm) {

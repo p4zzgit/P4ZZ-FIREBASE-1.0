@@ -106,8 +106,7 @@ export const Login = ({ settings, onLoginSuccess }) => {
     return { ...settings, ...masterSettings };
   }, [settings, masterSettings]);
 
-  // Função para obter classes de animação
-  const getAnimClass = (type?: string) => {
+  const getAnimClass = (type) => {
     switch (type) {
       case 'fade-in': return 'animate-in fade-in duration-1000';
       case 'slide': return 'animate-in slide-in-from-left-12 duration-1000';
@@ -206,7 +205,7 @@ export const Login = ({ settings, onLoginSuccess }) => {
     try {
       const data = await createPixPayment(pixAmount, `Renovação ${foundUser.name}`, foundUser.email);
       if (data) { setPixData(data); setPixStatus('pending'); }
-    } catch (err: any) {
+    } catch (err) {
         alert(err.message || "Erro ao gerar PIX");
     } finally { setIsGeneratingPix(false); }
   };
@@ -228,25 +227,25 @@ export const Login = ({ settings, onLoginSuccess }) => {
       }
       setFileError(null);
       const reader = new FileReader();
-      reader.onloadend = () => setReceiptImg(reader.result as string);
+      reader.onloadend = () => setReceiptImg(reader.result);
       reader.readAsDataURL(file);
     }
   };
 
-  const handleReqDocumentChange = (val: string) => {
+  const handleReqDocumentChange = (val) => {
     setReqDocument(formatCPF_CNPJ(val));
     if (fieldErrors.document) {
       setFieldErrors(prev => { const next = {...prev}; delete next.document; return next; });
     }
   };
 
-  const handleSearchDocChange = (val: string) => {
+  const handleSearchDocChange = (val) => {
     setSearchDoc(formatCPF_CNPJ(val));
     if (searchError) setSearchError('');
   };
 
   const validateRequestForm = async () => {
-    const errors: Record<string, string> = {};
+    const errors = {};
     const docClean = reqDocument.replace(/\D/g, '');
     const phoneClean = reqWhatsapp.replace(/\D/g, '');
     const loginClean = reqLogin.trim().toLowerCase();
@@ -289,7 +288,7 @@ export const Login = ({ settings, onLoginSuccess }) => {
     }
 
     const requestId = Math.random().toString(36).substr(2, 9);
-    const newRequest: AccessRequest = {
+    const newRequest = {
         id: requestId, 
         name: reqName.toUpperCase(), 
         document: docClean, 
@@ -311,12 +310,12 @@ export const Login = ({ settings, onLoginSuccess }) => {
     if (!confirmValueChecked || !receiptImg) return;
     setIsSubmitting(true);
     try {
-        const req: PaymentRequest = { 
+        const req = { 
             id: Math.random().toString(36).substr(2, 9), 
-            userId: foundUser!.id, 
-            tenantId: foundUser!.tenantId, 
-            userName: foundUser!.name, 
-            payerName: foundUser!.name, 
+            userId: foundUser.id, 
+            tenantId: foundUser.tenantId, 
+            userName: foundUser.name, 
+            payerName: foundUser.name, 
             payerDocument: searchDoc.replace(/\D/g, ''), 
             paymentTime: new Date().toLocaleTimeString(), 
             receiptImage: receiptImg, 
@@ -334,16 +333,16 @@ export const Login = ({ settings, onLoginSuccess }) => {
     }
   };
 
-  const renderLoginButton = (prefix: 'Plans' | 'Request' | 'Regularize' | 'Support') => {
+  const renderLoginButton = (prefix) => {
     const defaultTexts = { Plans: 'Nossos Planos', Request: 'Solicitar Acesso', Regularize: 'Regularização', Support: 'Suporte VIP' };
     const defaultIcons = { Plans: '💎', Request: '🚀', Regularize: '⚠️', Support: '💬' };
     const defaultColors = { Plans: '#4f46e5', Request: '#10b981', Regularize: '#f59e0b', Support: '#059669' };
-    const text = (safeSettings as any)[`loginBtn${prefix}Text`] || defaultTexts[prefix];
-    const subtext = (safeSettings as any)[`loginBtn${prefix}Subtext`] || '';
-    const bgColor = (safeSettings as any)[`loginBtn${prefix}Color`] || defaultColors[prefix];
-    const textColor = (safeSettings as any)[`loginBtn${prefix}TextColor`] || '#ffffff';
-    const iconBase64 = (safeSettings as any)[`loginBtn${prefix}Icon`];
-    const showIcon = (safeSettings as any)[`loginBtn${prefix}ShowIcon`] !== false;
+    const text = safeSettings[`loginBtn${prefix}Text`] || defaultTexts[prefix];
+    const subtext = safeSettings[`loginBtn${prefix}Subtext`] || '';
+    const bgColor = safeSettings[`loginBtn${prefix}Color`] || defaultColors[prefix];
+    const textColor = safeSettings[`loginBtn${prefix}TextColor`] || '#ffffff';
+    const iconBase64 = safeSettings[`loginBtn${prefix}Icon`];
+    const showIcon = safeSettings[`loginBtn${prefix}ShowIcon`] !== false;
     
     const action = async () => {
       if (prefix === 'Plans') setShowPlansModal(true);
@@ -376,7 +375,7 @@ export const Login = ({ settings, onLoginSuccess }) => {
   const boxPosition = safeSettings.loginBoxPosition || 'center';
   const justifyClass = boxPosition === 'left' ? 'md:justify-start md:px-20' : boxPosition === 'right' ? 'md:justify-end md:px-20' : 'md:justify-center';
 
-  const getLogoAnimClass = (type?: string) => {
+  const getLogoAnimClass = (type) => {
     switch (type) {
       case 'floating': return 'animate-bounce';
       case 'bounce': return 'animate-bounce';
@@ -500,7 +499,7 @@ export const Login = ({ settings, onLoginSuccess }) => {
               </button>
           </form>
           <div className="flex flex-col gap-3 pt-6 border-t border-white/5">
-              {(safeSettings.loginButtonsOrder || ['Plans', 'Request', 'Regularize', 'Support']).map(btn => renderLoginButton(btn as any))}
+              {(safeSettings.loginButtonsOrder || ['Plans', 'Request', 'Regularize', 'Support']).map(btn => renderLoginButton(btn))}
           </div>
       </div>
 

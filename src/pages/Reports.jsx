@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Sale, Product, Expense, User, ConsumptionRecord, CashierClosure } from '../types';
 import { getAppSettings, getTenantEmployees, getCashierClosures, getSales, getExpenses, getConsumptions, DEFAULT_SETTINGS } from '../services/storage';
 import { 
   PieChart, Pie, Cell, 
@@ -8,20 +7,12 @@ import {
   Tooltip as RechartsTooltip, ResponsiveContainer, Legend
 } from 'recharts';
 
-interface ReportsProps {
-  sales: Sale[];
-  products: Product[];
-  expenses: Expense[];
-  consumptions?: ConsumptionRecord[];
-  user: User | null;
-}
-
-const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expenses: initialExpenses, consumptions: initialConsumptions = [], user }) => {
+const Reports = ({ sales: initialSales, products, expenses: initialExpenses, consumptions: initialConsumptions = [], user }) => {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [closures, setClosures] = useState<CashierClosure[]>([]);
-  const [dbSales, setDbSales] = useState<Sale[]>(initialSales);
-  const [dbExpenses, setDbExpenses] = useState<Expense[]>(initialExpenses);
-  const [dbConsumptions, setDbConsumptions] = useState<ConsumptionRecord[]>(initialConsumptions);
+  const [closures, setClosures] = useState([]);
+  const [dbSales, setDbSales] = useState(initialSales);
+  const [dbExpenses, setDbExpenses] = useState(initialExpenses);
+  const [dbConsumptions, setDbConsumptions] = useState(initialConsumptions);
   const [isLoading, setIsLoading] = useState(true);
   
   // Controle visual das margens
@@ -32,8 +23,8 @@ const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expens
   
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
-  const [employees, setEmployees] = useState<User[]>([]);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('all');
+  const [employees, setEmployees] = useState([]);
 
   const forceResync = async () => {
       setIsLoading(true);
@@ -60,7 +51,7 @@ const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expens
     forceResync();
   }, [user?.tenantId]);
 
-  const setPeriod = (type: 'today' | 'month' | 'year') => {
+  const setPeriod = (type) => {
     if (type === 'today') {
       setStartDate(today);
       setEndDate(today);
@@ -78,7 +69,7 @@ const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expens
   };
 
   const filteredData = useMemo(() => {
-    const filterByDate = (item: { date: string }) => {
+    const filterByDate = (item) => {
       if (!item.date) return false;
       const itemDateLocal = new Date(item.date).toLocaleDateString('en-CA');
       return itemDateLocal >= startDate && itemDateLocal <= endDate;
@@ -88,7 +79,7 @@ const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expens
     const eFiltered = dbExpenses.filter(filterByDate);
     const cFiltered = dbConsumptions.filter(filterByDate);
 
-    const applyUserFilter = (list: any[]) => {
+    const applyUserFilter = (list) => {
       if (isEmployee) return list.filter(i => i.userId === user?.id);
       if (selectedEmployeeId !== 'all') return list.filter(i => i.userId === selectedEmployeeId);
       return list;
@@ -104,16 +95,16 @@ const Reports: React.FC<ReportsProps> = ({ sales: initialSales, products, expens
   const stats = useMemo(() => {
     let totalRevenue = 0;
     const revenueByMethod = { Pix: 0, Cartão: 0, Dinheiro: 0 };
-    const performanceByEmployee: Record<string, { name: string, total: number }> = {};
-    const productSummary: Record<string, { qty: number, totalVal: number }> = {};
+    const performanceByEmployee = {};
+    const productSummary = {};
 
-    const detailedItems: any[] = [];
+    const detailedItems = [];
 
     filteredData.sales.forEach(s => {
       const saleTotal = Number(s.total);
       totalRevenue += saleTotal;
       
-      const method = s.paymentMethod as keyof typeof revenueByMethod;
+      const method = s.paymentMethod;
       if (revenueByMethod.hasOwnProperty(method)) {
           revenueByMethod[method] += saleTotal;
       }

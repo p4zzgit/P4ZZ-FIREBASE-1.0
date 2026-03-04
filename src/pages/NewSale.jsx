@@ -1,27 +1,20 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Product, Sale, SaleItem, Delivery, Category } from '../types';
 import { 
   saveSale, getCategories, getAppSettings, 
   getCurrentUser, getNextDeliveryNumber, saveDelivery,
   DEFAULT_SETTINGS
 } from '../services/storage';
 
-interface NewSaleProps {
-  products: Product[];
-  onSaleComplete: () => void;
-  onBack: () => void;
-}
-
-const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) => {
-  const [cart, setCart] = useState<SaleItem[]>([]);
+const NewSale = ({ products, onSaleComplete, onBack }) => {
+  const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [printMode, setPrintMode] = useState<'customer' | 'kitchen'>('customer');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('all');
+  const [printMode, setPrintMode] = useState('customer');
   
   // Checkout e Pagamento
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<Sale['paymentMethod'] | null>(null);
-  const [amountReceived, setAmountReceived] = useState<string>(''); // Vazio por padrão
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [amountReceived, setAmountReceived] = useState(''); // Vazio por padrão
   const [showCashFlow, setShowCashFlow] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [showSafetyLock, setShowSafetyLock] = useState(false);
@@ -36,17 +29,17 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
 
   // Entrega
   const [isDeliveryMode, setIsDeliveryMode] = useState(false);
-  const [needsChange, setNeedsChange] = useState<boolean | null>(null);
+  const [needsChange, setNeedsChange] = useState(null);
   const [deliveryInfo, setDeliveryInfo] = useState({
     customerName: '', phone: '', address: '', reference: '', changeFor: '', isPaid: false
   });
 
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState([]);
   
   // REFERÊNCIAS PARA FOCO
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const cashInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef(null);
+  const cashInputRef = useRef(null);
 
   useEffect(() => {
     // Autofocus ao entrar (Atalho F2 ou clique)
@@ -75,13 +68,13 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     });
   }, [products, search, selectedCategoryId]);
 
-  const formatPhone = (val: string) => {
+  const formatPhone = (val) => {
     const v = val.replace(/\D/g, '').slice(0, 11);
     if (v.length <= 10) return v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
     return v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
   };
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product) => {
     if (product.stock <= 0) {
       alert("Estoque insuficiente para este item.");
       return;
@@ -98,7 +91,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     }
   };
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
       const barcodeValue = search.trim();
       if (!barcodeValue) return;
@@ -117,7 +110,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     const price = Number(manualPrice);
     if (isNaN(price)) return;
     
-    const newItem: SaleItem = {
+    const newItem = {
       productId: `manual-${Date.now()}`,
       productName: manualName.toUpperCase(),
       quantity: 1,
@@ -130,7 +123,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     setManualName(''); setManualPrice(''); setManualObs('');
   };
 
-  const updateQty = (idx: number, delta: number) => {
+  const updateQty = (idx, delta) => {
     setCart(prev => prev.map((item, i) => {
       if (i === idx) {
         const product = products.find(p => p.id === item.productId);
@@ -142,7 +135,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
         return newQty === 0 ? null : { ...item, quantity: newQty, subtotal: newQty * item.price };
       }
       return item;
-    }).filter((i): i is SaleItem => i !== null));
+    }).filter((i) => i !== null));
   };
 
   const executeReset = () => {
@@ -154,7 +147,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     setShowResetConfirm(false);
   };
 
-  const handlePrintAction = (mode: 'customer' | 'kitchen') => {
+  const handlePrintAction = (mode) => {
     setPrintMode(mode);
     setTimeout(() => {
       window.print();
@@ -168,7 +161,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
     
     try {
       const user = getCurrentUser();
-      const sale: Sale = {
+      const sale = {
         id: Math.random().toString(36).substr(2, 9),
         date: new Date().toISOString(),
         items: [...cart],
@@ -218,7 +211,7 @@ const NewSale: React.FC<NewSaleProps> = ({ products, onSaleComplete, onBack }) =
       const user = getCurrentUser();
       const nextNum = await getNextDeliveryNumber();
 
-      const newDelivery: Delivery = {
+      const newDelivery = {
         id: Math.random().toString(36).substr(2, 9),
         displayId: nextNum,
         customerName: deliveryInfo.customerName,

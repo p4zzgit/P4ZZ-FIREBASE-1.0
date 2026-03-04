@@ -1,12 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-interface LoginEffectsProps {
-  effect: 'none' | 'aurora' | 'particles' | 'matrix' | 'rain' | 'stars' | 'universe' | 'galaxy' | 'cosmos' | 'techno' | 'cyber' | 'neon';
-  color: string;
-}
-
-export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export const LoginEffects = ({ effect, color }) => {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     if (effect === 'none') return;
@@ -15,7 +10,7 @@ export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
+    let animationFrameId;
     let width = window.innerWidth;
     let height = window.innerHeight;
 
@@ -32,7 +27,7 @@ export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => 
     // --- EFFECTS LOGIC ---
 
     // 1. Particles
-    const particles: any[] = [];
+    const particles = [];
     if (effect === 'particles') {
       for (let i = 0; i < 100; i++) {
         particles.push({
@@ -47,7 +42,7 @@ export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => 
     }
 
     // 2. Stars
-    const stars: any[] = [];
+    const stars = [];
     if (effect === 'stars') {
       for (let i = 0; i < 200; i++) {
         stars.push({
@@ -60,7 +55,7 @@ export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => 
     }
 
     // 3. Rain
-    const drops: any[] = [];
+    const drops = [];
     if (effect === 'rain') {
       for (let i = 0; i < 100; i++) {
         drops.push({
@@ -74,7 +69,7 @@ export const LoginEffects: React.FC<LoginEffectsProps> = ({ effect, color }) => 
 
     // 4. Matrix
     const columns = Math.floor(width / 20);
-    const matrixDrops: number[] = [];
+    const matrixDrops = [];
     if (effect === 'matrix') {
       for (let i = 0; i < columns; i++) {
         matrixDrops[i] = Math.random() * -100;

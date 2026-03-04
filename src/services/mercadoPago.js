@@ -2,20 +2,11 @@ import { getAppSettings } from './storage';
 
 const API_URL = 'https://api.mercadopago.com/v1';
 
-export interface PixPaymentResponse {
-  id: string;
-  status: string;
-  status_detail: string;
-  qr_code: string;
-  qr_code_base64: string;
-  ticket_url: string;
-}
-
 export const createPixPayment = async (
-  amount: number, 
-  description: string, 
-  email: string
-): Promise<PixPaymentResponse | null> => {
+  amount, 
+  description, 
+  email
+) => {
   // Fix: Await getAppSettings as it returns a Promise
   const settings = await getAppSettings('MASTER');
   const token = settings.mercadoPagoAccessToken;
@@ -70,7 +61,7 @@ export const createPixPayment = async (
   }
 };
 
-export const checkPaymentStatus = async (paymentId: string): Promise<string> => {
+export const checkPaymentStatus = async (paymentId) => {
   // Fix: Await getAppSettings as it returns a Promise
   const settings = await getAppSettings('MASTER');
   const token = settings.mercadoPagoAccessToken;

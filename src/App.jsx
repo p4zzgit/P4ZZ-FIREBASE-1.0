@@ -82,7 +82,7 @@ const App = () => {
   const [initialCashInput, setInitialCashInput] = useState('');
   const [finalCashInput, setFinalCashInput] = useState('');
   const [isProcessingShift, setIsProcessingShift] = useState(false);
-  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [logoutError, setLogoutError] = useState(null);
 
   const isDemo = user?.role === 'demo';
 
@@ -144,7 +144,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.key === 'F1') { e.preventDefault(); handleNavigate('tables'); }
       else if (e.key === 'F2') { e.preventDefault(); handleNavigate('new-sale'); }
     };
@@ -270,7 +270,7 @@ const App = () => {
         setActiveShift(shift);
         setIsCashierOpening(false);
         setInitialCashInput('');
-        const updatedUser = { ...user, cashierStatus: 'Aberto' as const };
+        const updatedUser = { ...user, cashierStatus: 'Aberto' };
         setCurrentUser(updatedUser);
         setUser(updatedUser);
     } finally {
@@ -305,7 +305,7 @@ const App = () => {
     try {
         const metrics = cashierSummary;
         const totalInformed = metrics.pix + metrics.card + finalCash;
-        const closure: CashierClosure = {
+        const closure = {
             id: Math.random().toString(36).substr(2, 9),
             userId: user.id, userName: user.name, tenantId: user.tenantId,
             date: new Date().toISOString(),
@@ -317,7 +317,7 @@ const App = () => {
         await saveCashierClosure(closure);
         await closeCashierShift(activeShift.id, finalCash);
         
-        const updatedUser = { ...user, cashierStatus: 'Fechado' as const };
+        const updatedUser = { ...user, cashierStatus: 'Fechado' };
         setCurrentUser(updatedUser);
         setUser(updatedUser);
         setActiveShift(null);

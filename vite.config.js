@@ -8,7 +8,7 @@ const blockBackendFilesPlugin = () => ({
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
       const url = req.url?.toLowerCase() || '';
-      if (url.includes('configdb.ts') || url.includes('/server/')) {
+      if (url.includes('configdb.js') || url.includes('/server/')) {
         res.statusCode = 403;
         res.end('403 Forbidden: Access to backend configuration is blocked.');
         return;
@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         fs: {
-          deny: ['**/server/**', '**/ConfigDB.ts']
+          deny: ['**/server/**', '**/ConfigDB.js']
         }
       },
       plugins: [react(), tailwindcss(), blockBackendFilesPlugin()],

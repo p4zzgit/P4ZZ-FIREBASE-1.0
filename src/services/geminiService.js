@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-import { Product, Sale } from "../types";
 
-export const getSalesInsights = async (sales: Sale[], products: Product[]) => {
+export const getSalesInsights = async (sales, products) => {
   try {
     if (!sales.length) return "Realize algumas vendas para que eu possa analisar seu desempenho.";
 
@@ -18,7 +17,7 @@ export const getSalesInsights = async (sales: Sale[], products: Product[]) => {
     });
 
     return response.text || "Sem insights no momento.";
-  } catch (error: any) {
+  } catch (error) {
     console.warn("Gemini Sales Insights Error:", error);
     if (error.message?.includes('quota') || error.message?.includes('429')) {
       return "Cota diária de IA atingida. A análise retornará em breve.";
@@ -27,7 +26,7 @@ export const getSalesInsights = async (sales: Sale[], products: Product[]) => {
   }
 };
 
-export const generateProductDescription = async (productName: string) => {
+export const generateProductDescription = async (productName) => {
   try {
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const response = await ai.models.generateContent({

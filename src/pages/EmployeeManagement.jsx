@@ -1,55 +1,50 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { User, View, AppSettings, Sale, Product, ConsumptionRecord, CashierShift, SaleItem } from '../types';
 import { 
   getCurrentUser, getUsers, saveUsers, getAppSettings, 
   getSales, getProducts, saveConsumption, getConsumptions, 
   deleteConsumption, getCashierShifts, DEFAULT_SETTINGS, saveAllConsumptions
 } from '../services/storage';
 
-interface EmployeeManagementProps {
-  onNavigate?: (view: View) => void;
-}
-
-export default function EmployeeManagement({ onNavigate }: EmployeeManagementProps) {
+export default function EmployeeManagement({ onNavigate }) {
   const currentUser = useMemo(() => getCurrentUser(), []);
-  const [employees, setEmployees] = useState<User[]>([]);
-  const [activeTab, setActiveTab] = useState<'team' | 'audit'>('team');
+  const [employees, setEmployees] = useState([]);
+  const [activeTab, setActiveTab] = useState('team');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<User | null>(null);
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   
-  const [consumptionEmployee, setConsumptionEmployee] = useState<User | null>(null);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [consumptionEmployee, setConsumptionEmployee] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
   const [searchProduct, setSearchProduct] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [qty, setQty] = useState(1);
   const [isRegistering, setIsRegistering] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   
-  const [allConsumptions, setAllConsumptions] = useState<ConsumptionRecord[]>([]);
-  const [allSales, setAllSales] = useState<Sale[]>([]);
-  const [shifts, setShifts] = useState<CashierShift[]>([]);
+  const [allConsumptions, setAllConsumptions] = useState([]);
+  const [allSales, setAllSales] = useState([]);
+  const [shifts, setShifts] = useState([]);
 
   // Filtros Auditoria
-  const [auditEmployeeId, setAuditEmployeeId] = useState<string>('');
-  const [auditDate, setAuditDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [auditEmployeeId, setAuditEmployeeId] = useState('');
+  const [auditDate, setAuditDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Detalhes de Produtos Vendidos (Pop-up)
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedItemsForDetail, setSelectedItemsForDetail] = useState<SaleItem[]>([]);
+  const [selectedItemsForDetail, setSelectedItemsForDetail] = useState([]);
   
   // Modal Zerar Gastos (Protocolo 712010)
   const [showClearConsumptionsModal, setShowClearConsumptionsModal] = useState(false);
-  const [clearMode, setClearMode] = useState<'day' | 'month'>('day');
+  const [clearMode, setClearMode] = useState('day');
 
-  const [confirmDeleteEmp, setConfirmDeleteEmp] = useState<User | null>(null);
-  const [recordToDelete, setRecordToDelete] = useState<ConsumptionRecord | null>(null);
+  const [confirmDeleteEmp, setConfirmDeleteEmp] = useState(null);
+  const [recordToDelete, setRecordToDelete] = useState(null);
   
   const [formData, setFormData] = useState({
-    name: '', email: '', passwordHash: '', permissions: [] as View[], active: true, skipCashierClosure: false
+    name: '', email: '', passwordHash: '', permissions: [], active: true, skipCashierClosure: false
   });
 
-  const availablePermissions: { id: View; label: string }[] = [
+  const availablePermissions = [
     { id: 'dashboard', label: 'Painel Principal' },
     { id: 'new-sale', label: 'Realizar Vendas' },
     { id: 'tables', label: 'Gestão de Mesas' },
@@ -114,7 +109,7 @@ export default function EmployeeManagement({ onNavigate }: EmployeeManagementPro
     const totalRevenue = daySales.reduce((acc, s) => acc + s.total, 0);
     const totalItemsSold = daySales.reduce((acc, s) => acc + s.items.reduce((sum, item) => sum + item.quantity, 0), 0);
     
-    const allItemsSold: SaleItem[] = [];
+    const allItemsSold = [];
     daySales.forEach(s => allItemsSold.push(...s.items));
 
     const totalConsumptionToday = dayConsumptions.reduce((acc, c) => acc + c.totalPrice, 0);
@@ -140,7 +135,7 @@ export default function EmployeeManagement({ onNavigate }: EmployeeManagementPro
     };
   }, [auditEmployeeId, auditDate, allSales, allConsumptions, employees, shifts]);
 
-  const handleOpenModal = (emp?: User) => {
+  const handleOpenModal = (emp) => {
     if (emp) {
       setEditingEmployee(emp);
       setFormData({ 
@@ -158,7 +153,7 @@ export default function EmployeeManagement({ onNavigate }: EmployeeManagementPro
     setIsModalOpen(true);
   };
 
-  const handleOpenConsumption = (e: React.MouseEvent | null, emp: User) => {
+  const handleOpenConsumption = (e, emp) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -178,7 +173,7 @@ export default function EmployeeManagement({ onNavigate }: EmployeeManagementPro
     }
     
     setIsRegistering(true);
-    const record: ConsumptionRecord = {
+    const record = {
         id: Math.random().toString(36).substr(2, 9),
         userId: consumptionEmployee.id,
         userName: consumptionEmployee.name,
@@ -230,11 +225,11 @@ export default function EmployeeManagement({ onNavigate }: EmployeeManagementPro
     await refreshData();
   };
 
-  const handleSaveEmployee = async (e: React.FormEvent) => {
+  const handleSaveEmployee = async (e) => {
     e.preventDefault();
     if (!currentUser) return;
     const allUsers = await getUsers();
-    const employeeData: User = {
+    const employeeData = {
       id: editingEmployee ? editingEmployee.id : `emp-${Math.random().toString(36).substr(2, 9)}`,
       tenantId: currentUser.tenantId,
       name: formData.name.toUpperCase(),

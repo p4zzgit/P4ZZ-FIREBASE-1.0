@@ -1,22 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plan, User, Customer, AccessRequest } from '../types';
 import { 
   getGlobalPlans, saveGlobalPlans, getUsers, saveUsers, 
   getCustomers, saveCustomers, getAccessRequests, notifyDataChanged 
 } from '../services/storage';
 
-const PlanManagement: React.FC = () => {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [activeTab, setActiveTab] = useState<'general' | 'personalized'>('general');
+const PlanManagement = () => {
+  const [plans, setPlans] = useState([]);
+  const [activeTab, setActiveTab] = useState('general');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [editingPlan, setEditingPlan] = useState(null);
   const [searchPersonalized, setsearchPersonalized] = useState('');
   
   // Estado de erros para feedback visual
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const [formData, setFormData] = useState<Partial<Plan>>({
+  const [formData, setFormData] = useState({
     name: '',
     days: 30,
     price: 0,
@@ -35,7 +34,7 @@ const PlanManagement: React.FC = () => {
     whatsappConfirmed: false,
     email: '',
     passwordHash: '',
-    role: 'customer' as User['role'],
+    role: 'customer',
     planName: '',
     expiresAt: '',
     active: true,
@@ -45,10 +44,10 @@ const PlanManagement: React.FC = () => {
     gracePeriod: 10
   });
 
-  const [foundUser, setFoundUser] = useState<User | null>(null);
+  const [foundUser, setFoundUser] = useState(null);
   const [docError, setDocError] = useState('');
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [systemUsers, setSystemUsers] = useState<User[]>([]);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [systemUsers, setSystemUsers] = useState([]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -77,21 +76,21 @@ const PlanManagement: React.FC = () => {
     }
   };
 
-  const getClientNameByDoc = (doc?: string) => {
+  const getClientNameByDoc = (doc) => {
     if (!doc) return '---';
     const cleanDoc = doc.replace(/\D/g, '');
     const user = systemUsers.find(u => (u.document || '').replace(/\D/g, '') === cleanDoc);
     return user ? user.name : 'USUÁRIO NÃO LOCALIZADO';
   };
 
-  const getUserStatusByDoc = (doc?: string) => {
+  const getUserStatusByDoc = (doc) => {
     if (!doc) return 'inactive';
     const cleanDoc = doc.replace(/\D/g, '');
     const user = systemUsers.find(u => (u.document || '').replace(/\D/g, '') === cleanDoc);
     return user && user.active ? 'active' : 'inactive';
   };
 
-  const formatDocument = (val: string = '') => {
+  const formatDocument = (val = '') => {
     const v = val.replace(/\D/g, '').slice(0, 14);
     if (v.length <= 11) {
       return v
@@ -106,7 +105,7 @@ const PlanManagement: React.FC = () => {
       .replace(/(\d{4})(\d{1,2})$/, '$1-$2');
   };
 
-  const verifyDocument = (doc: string) => {
+  const verifyDocument = (doc) => {
     const cleanDoc = doc.replace(/\D/g, '');
     if (cleanDoc.length < 11) {
       setFoundUser(null);
@@ -130,13 +129,13 @@ const PlanManagement: React.FC = () => {
     }
   };
 
-  const formatWhatsApp = (val: string) => {
+  const formatWhatsApp = (val) => {
     const v = val.replace(/\D/g, '').slice(0, 11);
     if (v.length <= 10) return v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
     return v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
   };
 
-  const handleUserInputChange = (field: string, value: any) => {
+  const handleUserInputChange = (field, value) => {
     let updated = { ...userFormData, [field]: value };
     
     if (field === 'document') {
@@ -187,7 +186,7 @@ const PlanManagement: React.FC = () => {
     }
   };
 
-  const handleOpenModal = (plan?: Plan) => {
+  const handleOpenModal = (plan) => {
     setFoundUser(null);
     setDocError('');
     setFormErrors({});
@@ -252,7 +251,7 @@ const PlanManagement: React.FC = () => {
   };
 
   const validate = () => {
-    const errors: Record<string, string> = {};
+    const errors = {};
     
     if (!formData.isPersonalized) {
         // Validação para Plano Global
@@ -299,13 +298,13 @@ const PlanManagement: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!validate()) return;
     
     setIsSaving(true);
     try {
-        const planNameUpper = formData.name!.toUpperCase();
+        const planNameUpper = formData.name.toUpperCase();
         let linkedDoc = (formData.linkedDocument || '').replace(/\D/g, '');
 
         if (formData.isPersonalized) {
@@ -325,7 +324,7 @@ const PlanManagement: React.FC = () => {
                 return undefined;
             };
 
-            const newUser: User = {
+            const newUser = {
                 id: foundUser ? foundUser.id : 'user-' + Math.random().toString(36).substr(2, 9),
                 name: userFormData.name.toUpperCase(),
                 tenantId: userFormData.establishmentName.toUpperCase(),
@@ -362,19 +361,19 @@ const PlanManagement: React.FC = () => {
                     phone: newUser.whatsapp || '', 
                     document: newUser.document,
                     balance: idx !== -1 ? customers[idx].balance : 0, 
-                    status: 'active' as any,
+                    status: 'active',
                     createdAt: idx !== -1 ? customers[idx].createdAt : new Date().toISOString(),
                     linkedUserId: newUser.id, 
                     licenseExpiresAt: newUser.expiresAt || '',
                     planName: newUser.planName
                 };
-                if (idx !== -1) customers[idx] = custData as any; else customers.push(custData as any);
+                if (idx !== -1) customers[idx] = custData; else customers.push(custData);
                 await saveCustomers(customers, 'MASTER');
             }
         }
 
         // 3. Salvar/Atualizar Plano
-        const newPlan: Plan = {
+        const newPlan = {
           id: editingPlan ? editingPlan.id : Math.random().toString(36).substr(2, 9),
           name: planNameUpper,
           days: Number(formData.days),
@@ -387,7 +386,7 @@ const PlanManagement: React.FC = () => {
 
         const currentPlans = await getGlobalPlans();
         const safePlans = Array.isArray(currentPlans) ? currentPlans : [];
-        let updatedPlans: Plan[];
+        let updatedPlans;
         if (editingPlan) {
           updatedPlans = safePlans.map(p => p.id === editingPlan.id ? newPlan : p);
         } else {
@@ -710,7 +709,7 @@ const PlanManagement: React.FC = () => {
                                   <select 
                                      disabled={foundUser?.tenantId === 'MASTER' && foundUser?.role === 'admin'}
                                      value={userFormData.role} 
-                                     onChange={e => handleUserInputChange('role', e.target.value as any)} 
+                                     onChange={e => handleUserInputChange('role', e.target.value)} 
                                      className={`w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 dark:text-white border-none rounded-2xl font-black text-[11px] uppercase outline-none cursor-pointer ${foundUser?.tenantId === 'MASTER' ? 'opacity-60 cursor-not-allowed' : ''}`}
                                   >
                                       {foundUser?.tenantId === 'MASTER' && foundUser?.role === 'admin' ? (

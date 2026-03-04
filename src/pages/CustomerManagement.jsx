@@ -1,16 +1,15 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Customer, User, Plan } from '../types';
 import { getCustomers, saveCustomers, getAppSettings, getUsers, saveUsers, getGlobalPlans } from '../services/storage';
 
-const CustomerManagement: React.FC = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [systemUsers, setSystemUsers] = useState<User[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
+const CustomerManagement = () => {
+  const [customers, setCustomers] = useState([]);
+  const [systemUsers, setSystemUsers] = useState([]);
+  const [plans, setPlans] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<'all' | 'blocked' | 'tolerance' | 'active'>('all');
+  const [filter, setFilter] = useState('all');
 
-  const getLicenseStatus = (customer: Customer, users: User[]) => {
+  const getLicenseStatus = (customer, users) => {
     const linkedUser = users.find(u => u.id === customer.linkedUserId);
     const isDemo = linkedUser?.role === 'demo';
     const graceDays = linkedUser?.gracePeriod ?? 10;
@@ -24,7 +23,7 @@ const CustomerManagement: React.FC = () => {
             label: 'BANIDO', 
             color: 'text-white', 
             bg: 'bg-rose-700', 
-            status: 'blocked' as const,
+            status: 'blocked',
             desc: 'Violação de Termos' 
          };
       }
@@ -34,7 +33,7 @@ const CustomerManagement: React.FC = () => {
           label: 'DEMO EXPIRADA', 
           color: 'text-white', 
           bg: 'bg-slate-700', 
-          status: 'blocked' as const,
+          status: 'blocked',
           desc: 'Período de testes finalizado' 
         };
       }
@@ -43,13 +42,13 @@ const CustomerManagement: React.FC = () => {
         label: 'SUSPENSO', 
         color: 'text-slate-900', 
         bg: 'bg-yellow-400', 
-        status: 'blocked' as const,
+        status: 'blocked',
         desc: 'Acesso Interrompido' 
       };
     }
 
     if (!customer.licenseExpiresAt) {
-      return { label: 'A DEFINIR', color: 'text-white', bg: 'bg-slate-400', status: 'active' as const, desc: 'Aguardando configuração' };
+      return { label: 'A DEFINIR', color: 'text-white', bg: 'bg-slate-400', status: 'active', desc: 'Aguardando configuração' };
     }
 
     const today = new Date();
@@ -57,16 +56,16 @@ const CustomerManagement: React.FC = () => {
     const expiry = new Date(customer.licenseExpiresAt + 'T12:00:00');
     
     if (isNaN(expiry.getTime())) {
-        return { label: 'ERRO DATA', color: 'text-white', bg: 'bg-slate-400', status: 'active' as const, desc: 'Formato inválido' };
+        return { label: 'ERRO DATA', color: 'text-white', bg: 'bg-slate-400', status: 'active', desc: 'Formato inválido' };
     }
 
     if (today <= expiry) {
-      return { label: isDemo ? 'DEMO ATIVA' : 'LICENÇA ATIVA', color: 'text-white', bg: isDemo ? 'bg-indigo-500' : 'bg-emerald-500', status: 'active' as const, desc: 'Acesso liberado' };
+      return { label: isDemo ? 'DEMO ATIVA' : 'LICENÇA ATIVA', color: 'text-white', bg: isDemo ? 'bg-indigo-500' : 'bg-emerald-500', status: 'active', desc: 'Acesso liberado' };
     }
 
     // Carência não se aplica a contas DEMO (elas bloqueiam direto)
     if (isDemo) {
-        return { label: 'DEMO VENCIDA', color: 'text-white', bg: 'bg-rose-600', status: 'blocked' as const, desc: 'Converter para pagante' };
+        return { label: 'DEMO VENCIDA', color: 'text-white', bg: 'bg-rose-600', status: 'blocked', desc: 'Converter para pagante' };
     }
 
     const toleranceLimit = new Date(expiry);
@@ -75,13 +74,13 @@ const CustomerManagement: React.FC = () => {
     if (today <= toleranceLimit) {
       const diffTime = toleranceLimit.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return { label: `CARÊNCIA (${diffDays}d)`, color: 'text-white', bg: 'bg-amber-500', status: 'tolerance' as const, desc: `Bloqueio em ${toleranceLimit.toLocaleDateString()}` };
+      return { label: `CARÊNCIA (${diffDays}d)`, color: 'text-white', bg: 'bg-amber-500', status: 'tolerance', desc: `Bloqueio em ${toleranceLimit.toLocaleDateString()}` };
     }
     
-    return { label: 'EXPIRADO', color: 'text-white', bg: 'bg-rose-600', status: 'blocked' as const, desc: 'Licença Vencida' };
+    return { label: 'EXPIRADO', color: 'text-white', bg: 'bg-rose-600', status: 'blocked', desc: 'Licença Vencida' };
   };
 
-  const syncUserAccess = useCallback(async (currentCustomers: Customer[], currentUsers: User[]) => {
+  const syncUserAccess = useCallback(async (currentCustomers, currentUsers) => {
     let usersChanged = false;
     // Fix: await storage call
     const masterSettings = await getAppSettings('MASTER');
@@ -145,7 +144,7 @@ const CustomerManagement: React.FC = () => {
     loadAll();
   }, [syncUserAccess]);
 
-  const handleRenew = async (customerId: string) => {
+  const handleRenew = async (customerId) => {
     // Fix: await storage call
     const allC = await getCustomers('MASTER');
     const cIdx = allC.findIndex(c => c.id === customerId);
@@ -222,7 +221,7 @@ const CustomerManagement: React.FC = () => {
         </div>
         <select 
           value={filter} 
-          onChange={e => setFilter(e.target.value as any)} 
+          onChange={e => setFilter(e.target.value)} 
           className="px-5 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border-none font-black text-[10px] uppercase outline-none shadow-inner text-slate-900 dark:text-white"
         >
           <option value="all">FILTRAR STATUS</option>

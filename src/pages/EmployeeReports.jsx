@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { User, CashierShift, Sale, ConsumptionRecord } from '../types';
 import { getCurrentUser, getUsers, getCashierShifts, getSales, getConsumptions } from '../services/storage';
 
-const EmployeeReports: React.FC = () => {
+const EmployeeReports = () => {
   const user = getCurrentUser();
-  const [employees, setEmployees] = useState<User[]>([]);
-  const [shifts, setShifts] = useState<CashierShift[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [consumptions, setConsumptions] = useState<ConsumptionRecord[]>([]);
+  const [employees, setEmployees] = useState([]);
+  const [shifts, setShifts] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [consumptions, setConsumptions] = useState([]);
   
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toLocaleDateString('en-CA'));
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString('en-CA'));
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -44,10 +43,10 @@ const EmployeeReports: React.FC = () => {
         const shiftDate = new Date(s.openDate).toLocaleDateString('en-CA');
         const matchesDate = !selectedDate || shiftDate === selectedDate;
         return matchesEmployee && matchesDate;
-    }).sort((a, b) => new Date(b.openDate).getTime() - new Date(a.openDate).getTime());
+    }).sort((a, b) => new Date(b.openDate).getTime() - new Date(a.date || a.openDate).getTime());
   }, [shifts, selectedEmployeeId, selectedDate]);
 
-  const getShiftDetails = (shift: CashierShift) => {
+  const getShiftDetails = (shift) => {
     const shiftOpen = new Date(shift.openDate);
     const shiftClose = shift.closeDate ? new Date(shift.closeDate) : new Date();
 

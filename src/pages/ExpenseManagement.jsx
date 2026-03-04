@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Expense, AppSettings } from '../types';
 import { 
   saveExpense, 
   deleteExpense as storageDeleteExpense, 
@@ -7,32 +6,27 @@ import {
   DEFAULT_SETTINGS 
 } from '../services/storage';
 
-interface ExpenseManagementProps {
-  expenses: Expense[];
-  onUpdate: () => void;
-}
-
-const ExpenseManagement: React.FC<ExpenseManagementProps> = ({ expenses: initialExpenses, onUpdate }) => {
-  const [localExpenses, setLocalExpenses] = useState<Expense[]>(initialExpenses);
+const ExpenseManagement = ({ expenses: initialExpenses, onUpdate }) => {
+  const [localExpenses, setLocalExpenses] = useState(initialExpenses);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Partial<Expense>>({
+  const [deletingId, setDeletingId] = useState(null);
+  const [formData, setFormData] = useState({
     description: '', amount: 0, category: 'Operacional'
   });
   
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
 
   useEffect(() => {
     setLocalExpenses(initialExpenses);
     getAppSettings().then(setSettings);
   }, [initialExpenses]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.description || !formData.amount) return;
 
-    const newExpense: Expense = {
+    const newExpense = {
       id: `exp-${Math.random().toString(36).substr(2, 9)}`,
       description: formData.description.toUpperCase(),
       amount: Number(formData.amount),
@@ -48,7 +42,7 @@ const ExpenseManagement: React.FC<ExpenseManagementProps> = ({ expenses: initial
     onUpdate();
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     await storageDeleteExpense(id);
     setDeletingId(null);
     onUpdate();

@@ -1,10 +1,9 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { User, Plan } from '../types';
 import { getCurrentUser, getGlobalPlans } from '../services/storage';
 
-const MyPlan: React.FC = () => {
+const MyPlan = () => {
   const user = getCurrentUser();
-  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plans, setPlans] = useState([]);
 
   useEffect(() => {
     getGlobalPlans().then(setPlans);

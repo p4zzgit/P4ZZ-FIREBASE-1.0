@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { AppSettings } from '../types';
 import { getAppSettings, saveAppSettings, getCurrentUser, DEFAULT_SETTINGS } from '../services/storage';
 
-interface SupportProps {
-  onUpdate?: () => void;
-}
-
-const Support: React.FC<SupportProps> = ({ onUpdate }) => {
+const Support = ({ onUpdate }) => {
   const user = getCurrentUser();
   const isMaster = user?.tenantId === 'MASTER' && user?.role === 'admin';
   
   // localSettings carregará as definições do MASTER para visualização de todos
-  const [localSettings, setLocalSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [localSettings, setLocalSettings] = useState(DEFAULT_SETTINGS);
   const [showToast, setShowToast] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

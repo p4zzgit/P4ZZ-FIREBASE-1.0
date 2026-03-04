@@ -23,7 +23,7 @@ export const uploadImage = async (path, base64) => {
 };
 
 // Firebase Auth Helpers
-export const loginWithFirebase = async (email: string, pass: string) => {
+export const loginWithFirebase = async (email, pass) => {
   if (!USE_FIREBASE || !auth) return null;
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, pass);
@@ -144,7 +144,7 @@ const getActiveTenantId = () => {
   }
 };
 
-export const DEFAULT_MENU_STRUCTURE: MenuCategory[] = [
+export const DEFAULT_MENU_STRUCTURE = [
   { id: 'main', label: 'Operacional', items: ['dashboard', 'tables', 'new-sale', 'deliveries'] },
   { id: 'inventory', label: 'CATEGORIAS', items: ['products', 'categories'] },
   { id: 'financial', label: 'Financeiro', items: ['expenses', 'sales-history', 'reports'] },
@@ -152,7 +152,7 @@ export const DEFAULT_MENU_STRUCTURE: MenuCategory[] = [
   { id: 'master', label: 'MASTER', items: ['payment', 'user-management', 'customer-management', 'plan-management', 'settings'] }
 ];
 
-export const DEFAULT_SETTINGS: AppSettings = {
+export const DEFAULT_SETTINGS = {
   systemName: 'P4ZZ SYSTEM',
   primaryColor: '#00BFFF',
   accentColor: '#00BFFF',
@@ -265,7 +265,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   loginEffectColorEnabled: false,
 };
 
-const ALL_PERMISSIONS: View[] = [
+const ALL_PERMISSIONS = [
   'dashboard', 'products', 'categories', 'new-sale', 'sales-history', 
   'reports', 'tables', 'deliveries', 'user-management', 'expenses', 
   'settings', 'customer-management', 'payment', 'plan-management', 
@@ -313,7 +313,7 @@ export const getUsers = async () => {
       tenantId: 'MASTER',
       email: 'admin',
       passwordHash: 'admin',
-      role: 'admin' as const,
+      role: 'admin',
       active: true,
       permissions: ALL_PERMISSIONS
     };
@@ -373,7 +373,7 @@ export const setCurrentUser = (user) => {
 
 export const getProducts = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<Product[]>(`products_${tenantId}`, [], tenantId);
+  return await db.get(`products_${tenantId}`, [], tenantId);
 };
 
 export const saveProducts = async (products) => {
@@ -383,7 +383,7 @@ export const saveProducts = async (products) => {
 
 export const getConsumptions = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<ConsumptionRecord[]>(`consumptions_${tenantId}`, [], tenantId);
+  return await db.get(`consumptions_${tenantId}`, [], tenantId);
 };
 
 export const saveConsumption = async (record) => {
@@ -436,7 +436,7 @@ export const deleteConsumption = async (id) => {
 
 export const getCashierClosures = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<CashierClosure[]>(`closures_${tenantId}`, [], tenantId);
+  return await db.get(`closures_${tenantId}`, [], tenantId);
 };
 
 export const saveCashierClosure = async (closure) => {
@@ -455,7 +455,7 @@ export const deleteCashierClosure = async (id) => {
 
 export const getCashierShifts = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<CashierShift[]>(`shifts_${tenantId}`, [], tenantId);
+  return await db.get(`shifts_${tenantId}`, [], tenantId);
 };
 
 export const saveCashierShifts = async (shifts) => {
@@ -497,7 +497,7 @@ export const closeCashierShift = async (shiftId, finalCash) => {
 
 export const getSales = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<Sale[]>(`sales_${tenantId}`, [], tenantId);
+  return await db.get(`sales_${tenantId}`, [], tenantId);
 };
 
 export const saveSale = async (sale) => {
@@ -519,7 +519,7 @@ export const saveSale = async (sale) => {
   }
 };
 
-export const deleteSale = async (id: string) => {
+export const deleteSale = async (id) => {
   const tenantId = getActiveTenantId();
   const sales = await getSales();
   const saleToRemove = sales.find(s => s.id === id);
@@ -537,7 +537,7 @@ export const deleteSale = async (id: string) => {
 
 export const getAppSettings = async (tenantId) => {
   const tid = tenantId || getActiveTenantId();
-  return await db.get<AppSettings>(`settings_${tid}`, DEFAULT_SETTINGS, tid);
+  return await db.get(`settings_${tid}`, DEFAULT_SETTINGS, tid);
 };
 
 export const saveAppSettings = async (settings, tenantId) => {
@@ -547,7 +547,7 @@ export const saveAppSettings = async (settings, tenantId) => {
 
 export const getCategories = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<Category[]>(`categories_${tenantId}`, [], tenantId);
+  return await db.get(`categories_${tenantId}`, [], tenantId);
 };
 
 export const saveCategories = async (categories) => {
@@ -557,7 +557,7 @@ export const saveCategories = async (categories) => {
 
 export const getExpenses = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<Expense[]>(`expenses_${tenantId}`, [], tenantId);
+  return await db.get(`expenses_${tenantId}`, [], tenantId);
 };
 
 export const saveExpense = async (expense) => {
@@ -567,7 +567,7 @@ export const saveExpense = async (expense) => {
   await db.set(`expenses_${tenantId}`, expenses, tenantId);
 };
 
-export const deleteExpense = async (id: string) => {
+export const deleteExpense = async (id) => {
   const tenantId = getActiveTenantId();
   const expenses = await getExpenses();
   const updated = expenses.filter(e => e.id !== id);
@@ -576,7 +576,7 @@ export const deleteExpense = async (id: string) => {
 
 export const getDeliveries = async () => {
   const tenantId = getActiveTenantId();
-  return await db.get<Delivery[]>(`deliveries_${tenantId}`, [], tenantId);
+  return await db.get(`deliveries_${tenantId}`, [], tenantId);
 };
 
 export const saveDelivery = async (delivery) => {
@@ -593,7 +593,7 @@ export const saveAllDeliveries = async (deliveries) => {
   await db.set(`deliveries_${tenantId}`, deliveries, tenantId);
 };
 
-export const removeDelivery = async (id: string) => {
+export const removeDelivery = async (id) => {
   const tenantId = getActiveTenantId();
   const deliveries = await getDeliveries();
   const updated = deliveries.filter(d => d.id !== id);
@@ -609,7 +609,7 @@ export const getNextDeliveryNumber = async () => {
 };
 
 export const getAccessRequests = async () => {
-  return await db.get<AccessRequest[]>('access_requests', []);
+  return await db.get('access_requests', []);
 };
 
 export const saveAccessRequest = async (request) => {
@@ -618,14 +618,14 @@ export const saveAccessRequest = async (request) => {
   await db.set('access_requests', requests);
 };
 
-export const removeAccessRequest = async (id: string) => {
+export const removeAccessRequest = async (id) => {
   const requests = await getAccessRequests();
   const updated = requests.filter(r => r.id !== id);
   await db.set('access_requests', updated);
 };
 
 export const getPaymentRequests = async () => {
-  return await db.get<PaymentRequest[]>('payment_requests', []);
+  return await db.get('payment_requests', []);
 };
 
 export const savePaymentRequest = async (request) => {
@@ -636,14 +636,14 @@ export const savePaymentRequest = async (request) => {
   await db.set('payment_requests', requests);
 };
 
-export const removePaymentRequest = async (id: string) => {
+export const removePaymentRequest = async (id) => {
   const requests = await getPaymentRequests();
   const updated = requests.filter(r => r.id !== id);
   await db.set('payment_requests', updated);
 };
 
 export const getGlobalEstablishmentCategories = async () => {
-  return await db.get<string[]>('global_est_categories', ["Restaurante", "Pizzaria", "Lanchonete", "Loja", "Outros"]);
+  return await db.get('global_est_categories', ["Restaurante", "Pizzaria", "Lanchonete", "Loja", "Outros"]);
 };
 
 export const saveGlobalEstablishmentCategories = async (categories) => {
@@ -668,7 +668,7 @@ export const saveGlobalPlans = async (plans) => {
 };
 
 export const getCustomers = async (tenantId) => {
-  return await db.get<Customer[]>(`customers_${tenantId}`, [], tenantId);
+  return await db.get(`customers_${tenantId}`, [], tenantId);
 };
 
 export const saveCustomers = async (customers, tenantId) => {
@@ -727,7 +727,7 @@ export const exportFullBackup = async () => {
     a.click();
 };
 
-export const exportTenantBackup = async (tenantId: string) => {
+export const exportTenantBackup = async (tenantId) => {
     const data = { 
       products: await getProducts(), 
       sales: await getSales(), 
@@ -745,7 +745,7 @@ export const exportTenantBackup = async (tenantId: string) => {
     a.click();
 };
 
-export const importFullBackup = (content: string): boolean => {
+export const importFullBackup = (content) => {
   try {
     const data = JSON.parse(content);
     if (data.users) localStorage.setItem(STORAGE_PREFIX + 'users', JSON.stringify(data.users));

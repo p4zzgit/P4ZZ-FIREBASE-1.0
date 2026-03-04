@@ -1,14 +1,8 @@
 import React from 'react';
-import { AppSettings } from '../types';
-
-interface MarketingSectionProps {
-  settings: AppSettings;
-}
-
-export const MarketingSection: React.FC<MarketingSectionProps> = ({ settings }) => {
+export const MarketingSection = ({ settings }) => {
   const features = (settings.loginFeatures || '').split('\n').filter(f => f.trim() !== '');
   
-  const getAnimClass = (type?: string) => {
+  const getAnimClass = (type) => {
     switch (type) {
       case 'fade-in': return 'animate-in fade-in duration-1000';
       case 'slide': return 'animate-in slide-in-from-left-12 duration-1000';
@@ -19,7 +13,7 @@ export const MarketingSection: React.FC<MarketingSectionProps> = ({ settings }) 
     }
   };
 
-  const getFeatureAnimClass = (type?: string) => {
+  const getFeatureAnimClass = (type) => {
     switch (type) {
       case 'floating': return 'animate-bounce'; // Simplified for now
       case 'bounce': return 'animate-bounce';
@@ -33,7 +27,7 @@ export const MarketingSection: React.FC<MarketingSectionProps> = ({ settings }) 
   const flexAlign = alignment === 'left' ? 'items-start' : alignment === 'right' ? 'items-end' : 'items-center';
   const textAlign = alignment === 'left' ? 'text-left' : alignment === 'right' ? 'text-right' : 'text-center';
 
-  const getImageAnimClass = (type?: string) => {
+  const getImageAnimClass = (type) => {
     switch (type) {
       case 'floating': return 'animate-floating';
       case 'bounce': return 'animate-bounce';
@@ -107,7 +101,7 @@ export const MarketingSection: React.FC<MarketingSectionProps> = ({ settings }) 
                 color: settings.loginSalesTextColor || 'rgb(148, 163, 184)',
                 fontSize: `${settings.loginSalesTextSize || 12}px`, // Smaller text as requested
                 transform: `translate(${settings.loginSalesTextX || 0}px, ${settings.loginSalesTextY || 0}px)`,
-                textAlign: alignment as any
+                textAlign: alignment
               }}
             >
               {settings.loginSalesText || 'O SISTEMA MAIS COMPLETO E INTELIGENTE PARA GESTÃO DE ESTABELECIMENTOS.'}
@@ -129,9 +123,8 @@ export const MarketingSection: React.FC<MarketingSectionProps> = ({ settings }) 
                   height: settings.loginBalloonHeight ? `${settings.loginBalloonHeight}px` : 'auto',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  '--hover-bg': settings.loginMarketingPrimaryColorEnabled ? (settings.loginMarketingPrimaryColor || settings.primaryColor || '#6366f1') : (settings.primaryColor || '#6366f1')
-                } as any}
+                  justifyContent: 'center'
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = settings.loginMarketingPrimaryColorEnabled ? (settings.loginMarketingPrimaryColor || settings.primaryColor || '#6366f1') : (settings.primaryColor || '#6366f1');
                 }}
